@@ -835,8 +835,10 @@ event OnPageReset(string page)
 	ElseIf page == Pages[5]	;Female Weight
 
 		SetCursorFillMode(LEFT_TO_RIGHT)
-		addSliderOptionSt("WeightFemaleRootLowState", "$DVT_RootLow", WeightManager.RootLow[0], "{2}")
-		addSliderOptionSt("WeightFemaleRootHighState", "$DVT_RootHigh", WeightManager.RootHigh[0], "{2}")
+		If WeightManager.SkeletonScaling
+			addSliderOptionSt("WeightFemaleRootLowState", "$DVT_RootLow", WeightManager.RootLow[0], "{2}")
+			addSliderOptionSt("WeightFemaleRootHighState", "$DVT_RootHigh", WeightManager.RootHigh[0], "{2}")
+		EndIf
 		addInputOptionSt("WeightAddFemaleMorphState", "Add Female Morph", "")
 		AddEmptyOption()
 
@@ -873,8 +875,10 @@ event OnPageReset(string page)
 	ElseIf page == Pages[6]	;Male Weight
 
 		SetCursorFillMode(LEFT_TO_RIGHT)
-		addSliderOptionSt("WeightMaleRootLowState", "$DVT_RootLow", WeightManager.RootLow[0], "{2}")
-		addSliderOptionSt("WeightMaleRootHighState", "$DVT_RootHigh", WeightManager.RootHigh[0], "{2}")
+		If WeightManager.SkeletonScaling
+			addSliderOptionSt("WeightMaleRootLowState", "$DVT_RootLow", WeightManager.RootLow[0], "{2}")
+			addSliderOptionSt("WeightMaleRootHighState", "$DVT_RootHigh", WeightManager.RootHigh[0], "{2}")
+		EndIf
 		addInputOptionSt("WeightAddMaleMorphState", "Add Male Morph", "")
 		AddEmptyOption()
 
@@ -910,8 +914,10 @@ event OnPageReset(string page)
 	ElseIf page == Pages[7]	;Creature Weight
 
 		SetCursorFillMode(LEFT_TO_RIGHT)
-		addSliderOptionSt("WeightCreatureRootLowState", "$DVT_RootLow", WeightManager.RootLow[0], "{2}")
-		addSliderOptionSt("WeightCreatureRootHighState", "$DVT_RootHigh", WeightManager.RootHigh[0], "{2}")
+		If WeightManager.SkeletonScaling
+			addSliderOptionSt("WeightCreatureRootLowState", "$DVT_RootLow", WeightManager.RootLow[0], "{2}")
+			addSliderOptionSt("WeightCreatureRootHighState", "$DVT_RootHigh", WeightManager.RootHigh[0], "{2}")
+		EndIf
 		addInputOptionSt("WeightAddCreatureMorphState", "Add Creature Morph", "")
 		AddEmptyOption()
 
@@ -1427,6 +1433,7 @@ state WeightFemaleRootLowState
 
 	event OnSliderAcceptST(float a_value)
 		WeightManager.RootLow[0] = a_value
+		WeightManager.SyncSettings(false)
 		SetSliderOptionValueST(a_value, "{2}")
 	endEvent
 
@@ -1450,6 +1457,7 @@ state WeightFemaleRootHighState
 
 	event OnSliderAcceptST(float a_value)
 		WeightManager.RootHigh[0] = a_value
+		WeightManager.SyncSettings(false)
 		SetSliderOptionValueST(a_value, "{2}")
 	endEvent
 
@@ -1473,6 +1481,7 @@ state WeightMaleRootLowState
 
 	event OnSliderAcceptST(float a_value)
 		WeightManager.RootLow[1] = a_value
+		WeightManager.SyncSettings(false)
 		SetSliderOptionValueST(a_value, "{2}")
 	endEvent
 
@@ -1496,6 +1505,7 @@ state WeightMaleRootHighState
 
 	event OnSliderAcceptST(float a_value)
 		WeightManager.RootHigh[1] = a_value
+		WeightManager.SyncSettings(false)
 		SetSliderOptionValueST(a_value, "{2}")
 	endEvent
 
@@ -1520,6 +1530,7 @@ state WeightCreatureRootLowState
 
 	event OnSliderAcceptST(float a_value)
 		WeightManager.RootLow[2] = a_value
+		WeightManager.SyncSettings(false)
 		SetSliderOptionValueST(a_value, "{2}")
 	endEvent
 
@@ -1543,6 +1554,7 @@ state WeightCreatureRootHighState
 
 	event OnSliderAcceptST(float a_value)
 		WeightManager.RootHigh[2] = a_value
+		WeightManager.SyncSettings(false)
 		SetSliderOptionValueST(a_value, "{2}")
 	endEvent
 

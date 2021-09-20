@@ -26,6 +26,7 @@ Bool Property FemalesEnabled = false Auto Hidden
 Bool Property MalesEnabled = false Auto Hidden
 Bool Property CreaturesEnabled = false Auto Hidden
 Bool Property LinearChanges = false Auto Hidden
+Bool Property SkeletonScaling = false Auto Hidden
 Float Property WeightLoss = 0.05 auto Hidden
 Float Property WeightRate = 4.0 auto Hidden
 Float Property MaximumWeight = 2.0 Auto Hidden
@@ -343,23 +344,22 @@ float Function ChangeActorWeight(Actor target, float afChange, float afPreview =
 
 	Utility.Wait(0.001) ; A hacky fix but should prevent us from changing bodies while menus or console is up.
 
-	if RootLow[iRoot] != 1.0 && RootHigh[iRoot] != 1.0
+	if SkeletonScaling && RootLow[iRoot] != RootHigh[iRoot]
 		if fTargetWeight < 0.0
 			NIOverride.AddNodeTransformScale(target, false, isFemale, rootNode, PREFIX, 1.0 - fTargetWeight * RootLow[iRoot])
-			NIOverride.UpdateNodeTransform(target, false, isFemale, rootNode)
 		else
 			NIOverride.AddNodeTransformScale(target, false, isFemale, rootNode, PREFIX, 1.0 + fTargetWeight * RootHigh[iRoot])
-			NIOverride.UpdateNodeTransform(target, false, isFemale, rootNode)
 		endIf
+		NIOverride.UpdateNodeTransform(target, false, isFemale, rootNode)
 	endIf
 
 	if fTargetWeight < 0.0	; Targets need to be inverted for the sliders to end up at correct values if target is below 0.0 weight.
-		While iSlider < morphsEnd && MorphStrings[iSlider] != ""	;I'm curious if MorphStrings[iSlider] != "" could cause edge-case bugs if user deletes old morphs behind new morphs.
+		While iSlider < morphsEnd ;&& MorphStrings[iSlider] != ""	;I'm curious if MorphStrings[iSlider] != "" could cause edge-case bugs if user deletes old morphs behind new morphs.
 			NiOverride.SetBodyMorph(target, MorphStrings[iSlider], PREFIX, -fTargetWeight * MorphsLow[iSlider])
 			iSlider += 1
 		EndWhile
 	else
-		While iSlider < morphsEnd && MorphStrings[iSlider] != ""
+		While iSlider < morphsEnd ;&& MorphStrings[iSlider] != ""
 			NiOverride.SetBodyMorph(target, MorphStrings[iSlider], PREFIX, fTargetWeight * MorphsHigh[iSlider])
 			iSlider += 1
 		EndWhile
@@ -443,9 +443,7 @@ EndFunction
 
 
 bool Function removeMorph(int iSliderIndex)
-
     MorphStrings[iSliderIndex] = ""
-
 	SyncSettings(true)
     return true
 EndFunction
@@ -501,14 +499,14 @@ Function LoadSettingsFrom(int data)
 	NoValueFood = 			JArray.asFormArray(JMap.getObj(data, "NoValueFood", JArray.ObjectWithForms(NoValueFood)))
 
 	if MorphStrings == none 
-		MorphStrings = new String[128]
-		MorphsHigh = new float[128]
-		MorphsLow = new float[128]
+		MorphStrings = new String[96]
+		MorphsHigh = new float[96]
+		MorphsLow = new float[96]
 
-    elseif MorphStrings.length < 128
-        Utility.ResizeStringArray(MorphStrings, 128)
-        Utility.ResizeFloatArray(MorphsHigh, 128)
-        Utility.ResizeFloatArray(MorphsLow, 128)
+    elseif MorphStrings.length < 96
+        Utility.ResizeStringArray(MorphStrings, 96)
+        Utility.ResizeFloatArray(MorphsHigh, 96)
+        Utility.ResizeFloatArray(MorphsLow, 96)
     endIf
 EndFunction
 
