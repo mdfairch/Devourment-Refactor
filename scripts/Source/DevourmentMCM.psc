@@ -67,7 +67,7 @@ Spell Property Power_EatThis auto
 
 
 ; Script-defined Properties.
-int property VERSION = 120 auto Hidden
+int property VERSION = 118 auto Hidden
 bool property EnableHungryBones = true auto Hidden
 bool property EnableCordyceps = true auto Hidden 
 bool property LooseItemVore = true auto Hidden
@@ -107,7 +107,7 @@ int bellyPreset = 1
 int optionsMap
 
 int function GetVersion()
-	return 120
+	return 118
 endFunction
 
 event OnConfigInit()
@@ -121,7 +121,7 @@ event OnConfigInit()
 	Pages[6] = "$DVT_Page_WeightManagerMale"
 	;Pages[?] = "$DVT_Page_WeightManagerCreature"	;TODO. When you enable this, make sure the page is in MCM Config.JSON also.
 	Pages[7] = "$DVT_Page_Debugging"
-	Pages[8] = "$DVT_Page_Dependencies"
+	Pages[8] = "$DVT_Page_Dependancies"
 
 	equipList = new string[3]
 	equipList[0] = "$DVT_EquipNone"
@@ -2380,16 +2380,16 @@ Function DisplayQuickSettings()
 		ENTRY_SUBJECT = menu.AddEntryItem("Subject: " + playerName)
 	endIf
 
-	int ENTRY_BELLY1 = menu.AddEntryItem("View " + playerName + "'s' contents", entryHasChildren = true)
+	int ENTRY_BELLY1 = menu.AddEntryItem("View " + playerName + "'s contents", entryHasChildren = true)
 	AddPredContents(menu, ENTRY_BELLY1, playerRef)
 
-	if target2 != PlayerRef
-		int ENTRY_BELLY2 = menu.AddEntryItem("View " + target2Name + "'s' contents", entryHasChildren = true)
+	if target2 != None && target2 != PlayerRef
+		int ENTRY_BELLY2 = menu.AddEntryItem("View " + target2Name + "'s contents", entryHasChildren = true)
 		AddPredContents(menu, ENTRY_BELLY2, target2)
 	endIf
 
-	if target3 != PlayerRef && target3 != target2
-		int ENTRY_BELLY3 = menu.AddEntryItem("View " + target3Name + "'s' contents", entryHasChildren = true)
+	if target3 != None && target3 != PlayerRef && target3 != target2
+		int ENTRY_BELLY3 = menu.AddEntryItem("View " + target3Name + "'s contents", entryHasChildren = true)
 		AddPredContents(menu, ENTRY_BELLY3, target3)
 	endIf
 
@@ -2571,7 +2571,11 @@ Function DisplayQuickSettings()
 			exit = true
 
 		elseif result == ENTRY_INVENTORY_EAT
-			Power_EatThis.cast(playerRef, playerRef)
+			Actor fakePlayer = Manager.FakePlayer
+			fakePlayer.MoveTo(PlayerRef)
+			fakePlayer.SetAlpha(0.0, false)
+			Power_EatThis.cast(playerRef, fakePlayer)
+			exit = true
 
 		elseif result == ENTRY_SLEEP
 			PlayerAlias.VoreSleep()
@@ -2591,3 +2595,10 @@ Function DisplayQuickSettings()
 		endIf
 	endWhile
 EndFunction
+
+
+DevourmentMCM Function instance() global
+	{ Returns the DevourmentMCM instance, for situations in which a property isn't helpful (like global functions). }
+	return Quest.GetQuest("DevourmentMCM") as DevourmentMCM
+EndFunction
+	
