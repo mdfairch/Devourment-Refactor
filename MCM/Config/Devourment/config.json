@@ -951,6 +951,25 @@
 					"type": "empty"
 				},
 				{
+					"text": "$DVT_SkeletonScaling",
+					"help": "$DVT_Help_SkeletonScaling",
+					"type": "toggle",
+					"valueOptions": {
+						"sourceType": "PropertyValueBool",
+						"sourceForm": "Devourment.esp|A9B",
+						"scriptName": "DevourmentWeightManager",
+						"propertyName": "SkeletonScaling",
+						"defaultValue": false
+					},
+					"action": {
+						"type": "CallFunction",
+						"form": "Devourment.esp|A9B",   
+						"scriptName": "DevourmentWeightManager",     
+						"function": "SyncSettings",
+						"params": [false]
+					}
+				},
+				{
 					"text": "$DVT_LinearWeight",
 					"help": "$DVT_Help_LinearWeight",
 					"type": "toggle",
@@ -1482,7 +1501,7 @@
 			]
 		},
 		{
-			"pageDisplayName": "$DVT_Page_Dependancies",
+			"pageDisplayName": "$DVT_Page_Dependencies",
 			"cursorFillMode": "topToBottom",
 			"content": [
 			]

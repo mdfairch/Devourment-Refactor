@@ -121,7 +121,7 @@ event OnConfigInit()
 	Pages[6] = "$DVT_Page_WeightManagerMale"
 	;Pages[?] = "$DVT_Page_WeightManagerCreature"	;TODO. When you enable this, make sure the page is in MCM Config.JSON also.
 	Pages[7] = "$DVT_Page_Debugging"
-	Pages[8] = "$DVT_Page_Dependancies"
+	Pages[8] = "$DVT_Page_Dependencies"
 
 	equipList = new string[3]
 	equipList[0] = "$DVT_EquipNone"
