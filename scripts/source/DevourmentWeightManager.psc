@@ -753,9 +753,9 @@ Function LoadSettings(int data)
 	PlayerEnabled =			JMap.GetInt(data, "PlayerEnabled", PlayerEnabled as int) as bool
 	CompanionsEnabled =		JMap.GetInt(data, "CompanionsEnabled", CompanionsEnabled as int) as bool
 	ActorsEnabled =			JMap.GetInt(data, "ActorsEnabled", ActorsEnabled as int) as bool
-	FemalesEnabled =		JMap.GetInt(data, "FemalesEnabled", ActorsEnabled as int) as bool
-	MalesEnabled =			JMap.GetInt(data, "MalesEnabled", ActorsEnabled as int) as bool
-	CreaturesEnabled =		JMap.GetInt(data, "CreaturesEnabled", ActorsEnabled as int) as bool
+	FemalesEnabled =		JMap.GetInt(data, "FemalesEnabled", FemalesEnabled as int) as bool
+	MalesEnabled =			JMap.GetInt(data, "MalesEnabled", MalesEnabled as int) as bool
+	CreaturesEnabled =		JMap.GetInt(data, "CreaturesEnabled", CreaturesEnabled as int) as bool
 	LinearChanges =			JMap.GetInt(data, "LinearChanges", LinearChanges as int) as bool
 	WeightLoss =			JMap.GetFlt(data, "WeightLoss", WeightLoss)
 	WeightRate =			JMap.GetFlt(data, "WeightRate", WeightRate)
