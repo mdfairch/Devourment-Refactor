@@ -42,7 +42,7 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 	doBleedoutVore = !Game.IsPluginInstalled("SexLabDefeat.esp")
 	doCorpseVore = pred.IsInFaction(CorpseVore)
 
-	if LibFire.ActorIsFollower(pred)
+	if pred.IsPlayerTeammate()
 		cooldownTime = Manager.Cooldown_Follower
 	elseif pred.HasKeywordString("ActorTypeNPC")
 		cooldownTime = Manager.Cooldown_NPC

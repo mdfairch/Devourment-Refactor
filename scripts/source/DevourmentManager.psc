@@ -81,7 +81,17 @@ DevourmentWeightManager property WeightManager auto
 Explosion property BoneExplosion auto
 Faction property PlayerFaction auto
 FormList property FullnessTypes_All auto
-Form[] property EMPTY auto
+Actor[] property PredatorWhitelist auto
+{ Predators inside this can always Vore, no matter other settings. }
+;/
+PERSISTENCE NOTES: "When a script property is pointed at a reference in the editor, the target reference will be flagged as "permanently persistent". 
+In other words, nothing you do during runtime will unload the object. This means that, if possible, you should not use properties to point at references directly. 
+If you can, pull references in from events or other locations to avoid permanently keeping them around." 
+https://www.creationkit.com/index.php?title=Persistence_(Papyrus)#Properties 
+
+I was concerned making an Actor[] property in Skyrim I fill in-game would make Actors persistent. I'm keeping this note to remind myself this is fine.
+/;
+
 GlobalVariable property Devourment_PerkPoints auto
 GlobalVariable property Devourment_PredProgress auto
 GlobalVariable property Devourment_PredSkill auto
@@ -188,43 +198,6 @@ bool property VisualStruggles = true auto
 bool property ComplexStruggles = false auto
 bool property SkillGain = true auto
 bool property AttributeGain = true auto
-
-bool property draugrPred = true Auto
-bool property dragonPred = true Auto
-bool property wolfPred = true Auto
-bool property dogPred = true Auto
-bool property bearPred = true Auto
-bool property deerPred = true Auto
-bool property sabrecatPred = true Auto
-bool property horsePred = true Auto
-bool property cowPred = true Auto
-bool property GoatPred = true Auto
-bool property SpiderPred = true Auto
-bool property ChaurusPred = true Auto
-bool property MammothPred = true Auto
-bool property AtronachPred = true Auto
-bool property IceWraithPred = true Auto
-bool property VampireLordPred = true Auto
-bool property WerewolfPred = true Auto
-bool property TrollPred = true Auto
-bool property SkeeverPred = true Auto
-bool property SlaughterfishPred = true Auto
-bool property RabbitPred = true Auto
-bool property FoxPred = true Auto
-bool property MudcrabPred = true Auto
-bool property SprigganPred = true Auto
-bool property WispmotherPred = true Auto
-bool property GiantPred = true Auto
-bool property ChickenPred = true Auto
-bool property HorkerPred = true Auto
-bool property DwemerPred = true Auto
-bool property HagravenPred = true Auto
-bool property FalmerPred = true Auto
-bool property DragonPriestPred = true Auto
-bool property AshHopperPred = true Auto
-bool property GargoylePred = true Auto
-bool property LurkerPred = true Auto
-bool property SeekerPred = true Auto
 
 float property AcidDamageModifier = 1.0 auto
 float property BurpsRate = 16.0 auto
@@ -3588,7 +3561,7 @@ Success is automatic for followers or lovers.
 		return 0.0
 	elseif relationship >= 4.0 || endoAnyone
 		return 1.0
-	elseif pred == playerRef && LibFire.ActorIsFollower(prey)
+	elseif pred == playerRef && prey.IsPlayerTeammate()
 		return 1.0
 	elseif prey.HasKeyword(KeywordSurrender)
 		return 1.0
@@ -4545,13 +4518,13 @@ endFunction
 
 
 bool Function IsValidDigestion(Actor pred, Actor prey)
-	int keywordIndex = LibFire.ActorFindAnyKeyword(prey, RaceDigestionKeywords)
+	;int keywordIndex = LibFire.ActorFindAnyKeyword(prey, RaceDigestionKeywords)
 
-	if keywordIndex == 0 ; prey.hasKeyword(ActorTypeUndead)
+	if prey.hasKeyword(ActorTypeUndead) ; keywordIndex == 0
 		return pred.hasPerk(Menu.DigestionUndead)
-	elseif keywordIndex == 1 ; prey.hasKeyword(ActorTypeDaedra)
+	elseif prey.hasKeyword(ActorTypeDaedra) ; keywordIndex == 1
 		return pred.hasPerk(Menu.DigestionDaedric)
-	elseif keywordIndex == 2 ; prey.hasKeyword(ActorTypeDwarven)
+	elseif prey.hasKeyword(ActorTypeDwarven) ; keywordIndex == 2
 		return pred.hasPerk(Menu.DigestionDwemer)
 	else
 		return true
@@ -4579,17 +4552,17 @@ Determines if a prey is eligible to be digested.
 	Actor pred = f1 as Actor
 	Actor prey = f2 as Actor
 
-	int keywordIndex = LibFire.ActorFindAnyKeyword(prey, RaceDigestionKeywords)
+	;int keywordIndex = LibFire.ActorFindAnyKeyword(prey, RaceDigestionKeywords)
 
-	if keywordIndex == 0 ; prey.hasKeyword(ActorTypeUndead)
+	if prey.hasKeyword(ActorTypeUndead) ; keywordIndex == 0
 		if !pred.hasPerk(Menu.DigestionUndead)
 			HandleInvalidDigestion(MessageIndigestible[0], pred, prey)
 		endIf
-	elseif keywordIndex == 1 ; prey.hasKeyword(ActorTypeDaedra)
+	elseif prey.hasKeyword(ActorTypeDaedra) ; keywordIndex == 1
 		if !pred.hasPerk(Menu.DigestionDaedric)
 			HandleInvalidDigestion(MessageIndigestible[1], pred, prey)
 		endIf
-	elseif keywordIndex == 2 ; prey.hasKeyword(ActorTypeDwarven)
+	elseif prey.hasKeyword(ActorTypeDwarven) ; keywordIndex == 2
 		if !pred.hasPerk(Menu.DigestionDwemer)
 			HandleInvalidDigestion(MessageIndigestible[2], pred, prey)
 		endIf
@@ -4734,18 +4707,16 @@ EndFunction
 
 
 bool Function validPredator(Actor target)
-	if target == None || target.isChild()
+	If target == None || target.isChild()
 		return false
-	elseif companionPredPreference > 0 && LibFire.ActorIsFollower(target)
-        return companionPredPreference == 1
-    elseif target.hasKeyword(ActorTypeCreature)
-		if creaturePreds
-			String raceName = Remapper.RemapRaceName(target)
-			int index = CreaturePredatorStrings.Find(raceName)
-			return index >= 0 && CreaturePredatorToggles[index]
-		Else
-			return false
-		endIf
+	EndIf
+	If PredatorWhitelist.find(target)
+		return true
+	EndIf
+    If target.hasKeyword(ActorTypeCreature)
+		String raceName = Remapper.RemapRaceName(target)
+		int index = CreaturePredatorStrings.Find(raceName)
+		return index >= 0 && CreaturePredatorToggles[index] && creaturePreds
 	elseIf target.HasKeyword(ActorTypeNPC)
 		int sex = target.getLeveledActorBase().getSex()	;We only care for Sex where humanoids are concerned.
 		return (sex == 0 && MalePreds) || (sex != 0 && FemalePreds)
@@ -4757,14 +4728,13 @@ EndFunction
 
 bool Function areFriends(Actor pred, Actor prey)
 	if pred == playerRef
-		 return prey.getRelationshipRank(pred) > 0 \
-		 	|| LibFire.ActorIsFollower(prey) \
-			|| prey.IsPlayersLastRiddenHorse()
+		return prey.getRelationshipRank(pred) > 0 \
+		|| prey.IsPlayerTeammate() \
+		|| prey.IsPlayersLastRiddenHorse()
 	elseif prey == playerRef
-		 return pred.getRelationshipRank(prey) > 0 \
-		 	|| LibFire.ActorIsFollower(prey) \
-			|| pred.IsPlayersLastRiddenHorse()
-
+		return pred.getRelationshipRank(prey) > 0 \
+		|| prey.IsPlayerTeammate() \
+		|| pred.IsPlayersLastRiddenHorse()
 	else
 		return prey.getRelationshipRank(pred) > 0
 	endIf
@@ -5645,7 +5615,16 @@ EndFunction
 
 
 float Function GetPerkMultiplier(Actor subject, Perk[] perks, float base, float mult)
-	int perkIndex = LibFire.ActorFindAnyPerk(subject, perks)
+	;int perkIndex = LibFire.ActorFindAnyPerk(subject, perks)
+	int perkIndex = -1
+	int perksLength = perks.Length
+	int iIndex = 0
+    while iIndex < perksLength && perkIndex == -1
+		if subject.HasPerk(perks[iIndex])
+			perkIndex = iIndex
+		endIf
+		iIndex += 1
+	endWhile
 	int perkLevel = 1 + perkIndex
 	float result = base + mult * (perkLevel as float)
 

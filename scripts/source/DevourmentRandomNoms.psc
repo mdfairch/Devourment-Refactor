@@ -123,7 +123,7 @@ Function SearchForNoms2()
 		return
 	endIf
 
-	if pred.getLevel() < prey.getLevel() && !LibFire.ActorIsFollower(pred) && IsViablePredator(prey) && IsViablePrey(pred)
+	if pred.getLevel() < prey.getLevel() && !pred.IsPlayerTeammate() && IsViablePredator(prey) && IsViablePrey(pred)
 		if Debugging
 			Log1(PREFIX, "SearchForNom2", "Doing pred-Prey swap")
 		endIf
@@ -200,14 +200,51 @@ EndFunction
 Actor Function SearchForPrey_Player()
 	; Make a list of all potential prey in the area.
 	Actor[] potentialPrey
+	ObjectReference[] NearbyObjects
 
 	if Manager.playerPreference == 2
 		potentialPrey = new Actor[1]
 		potentialPrey[0] = PlayerRef
 	elseif Manager.playerPreference == 1
-		potentialPrey = LibFire.FindNearbyTeammates(ScanRange)
+		NearbyObjects = PO3_SKSEFunctions.FindAllReferencesOfFormType(PlayerRef,62,ScanRange)
+		int i = NearbyObjects.Length
+		int count = 0
+		while i
+			Actor subject = NearbyObjects[i] as Actor
+			if subject.IsPlayerTeammate()
+				count += 1
+			endIf
+			i -= 1
+		endWhile
+		potentialPrey = PapyrusUtil.ActorArray(count)
+		while i < NearbyObjects.Length
+			Actor subject = NearbyObjects[i] as Actor
+			if subject.IsPlayerTeammate()
+				potentialPrey[count] = subject
+				count -= 1
+			endif
+			i += 1
+		endwhile
+		;potentialPrey = LibFire.FindNearbyTeammates(ScanRange)
 	else
-		potentialPrey = LibFire.FindNearbyTeammates(ScanRange)
+		NearbyObjects = PO3_SKSEFunctions.FindAllReferencesOfFormType(PlayerRef,62,ScanRange)
+		int i = NearbyObjects.Length
+		int count = 0
+		while i 
+			Actor subject = NearbyObjects[i] as Actor
+			if subject.IsPlayerTeammate()
+				count += 1
+			endIf
+			i -= 1
+		endWhile
+		potentialPrey = PapyrusUtil.ActorArray(count)
+		while i < NearbyObjects.Length
+			Actor subject = NearbyObjects[i] as Actor
+			if subject.IsPlayerTeammate()
+				potentialPrey[count] = subject
+				count -= 1
+			endif
+		endwhile
 		potentialPrey = PapyrusUtil.PushActor(potentialPrey, PlayerRef)
 	endIf
 
@@ -255,7 +292,7 @@ Actor Function SearchForPrey_NonPlayer()
 		i -= 1
 		Actor candidate = potentialPrey[i]
 
-		if candidate != playerRef && !LibFire.ActorIsFollower(candidate) && IsViablePrey(candidate)
+		if candidate != playerRef && !candidate.IsPlayerTeammate() && IsViablePrey(candidate)
 			viablePrey[numViablePrey] = candidate
 			numViablePrey += 1
 		endIf
