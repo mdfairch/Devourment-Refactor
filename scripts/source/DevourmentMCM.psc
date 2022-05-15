@@ -26,7 +26,6 @@ DevourmentPlayerAlias Property PlayerAlias Auto
 DevourmentManager Property Manager Auto
 DevourmentMorphs Property Morphs Auto
 DevourmentSkullHandler Property SkullHandler Auto
-DevourmentWeightManager Property WeightManager Auto
 GlobalVariable Property VoreDialog Auto
 float[] property LocusChances auto
 float[] property LocusCumulative auto
@@ -67,7 +66,7 @@ Spell Property Power_EatThis auto
 
 
 ; Script-defined Properties.
-int property VERSION = 120 auto Hidden
+int property VERSION = 200 auto Hidden
 bool property EnableHungryBones = true auto Hidden
 bool property EnableCordyceps = true auto Hidden 
 bool property LooseItemVore = true auto Hidden
@@ -79,7 +78,6 @@ bool property UnrestrictedItemVore = false auto Hidden
 bool property GentleGas = false auto Hidden
 bool property CounterVoreEnabled = true auto Hidden
 bool property DigestToInventory = false auto Hidden
-bool property FoundBugFixesSSE = false auto
 String property ExportFilename = "data\\skse\\plugins\\devourment\\db_export.json" autoreadonly Hidden
 String property SettingsFileName = "data\\skse\\plugins\\devourment\\settings.json" autoreadonly Hidden
 String property PredPerkFile = "data\\skse\\plugins\\devourment\\PredPerkData.json" autoreadonly Hidden
@@ -93,7 +91,6 @@ String Property targetName Auto Hidden
 string[] equipList
 
 bool resetBellies = false
-bool resetWeights = false
 bool vomitActivated = false
 bool flushActivated = false
 
@@ -108,22 +105,19 @@ int optionsMap
 
 
 int function GetVersion()
-	return 120
+	return 200
 endFunction
 
 
 event OnConfigInit()
-	Pages = new string[10]
+	Pages = new string[7]
 	Pages[0] = "$DVT_Page_StatsSkills"
 	Pages[1] = "$DVT_Page_General"
 	Pages[2] = "$DVT_Page_VisualSoundMisc"
 	Pages[3] = "$DVT_Page_LocusMorphs"
 	Pages[4] = "$DVT_Page_WeightSettings"
-	Pages[5] = "$DVT_Page_WeightManagerFemale"
-	Pages[6] = "$DVT_Page_WeightManagerMale"
-	;Pages[?] = "$DVT_Page_WeightManagerCreature"	;TODO. When you enable this, make sure the page is in MCM Config.JSON also.
-	Pages[7] = "$DVT_Page_Debugging"
-	Pages[8] = "$DVT_Page_Dependancies"
+	Pages[5] = "$DVT_Page_Debugging"
+	Pages[6] = "$DVT_Page_Dependancies"
 
 	equipList = new string[3]
 	equipList[0] = "$DVT_EquipNone"
@@ -132,20 +126,19 @@ event OnConfigInit()
 endEvent
 
 
-;Event OnVersionUpdate(int newVersion)
-;	Upgrade(CurrentVersion, newVersion)
-;EndEvent
+Event OnVersionUpdate(int newVersion)
+	Upgrade(CurrentVersion, newVersion)
+EndEvent
 
 
 Function Upgrade(int oldVersion, int newVersion)
-{ Version 118 is a clean break, so upgrades all start from there. }
+{ Version 200 is a clean break, so upgrades all start from there. }
 	if oldVersion < newVersion
 		VERSION = newVersion
 		PlayerAlias.Upgrade(oldVersion, newVersion)
 		Manager.Upgrade(oldVersion, newVersion)
 		DevourmentSkullHandler.instance().Upgrade(oldVersion, newVersion)
 		DevourmentReformationQuest.instance().Upgrade(oldVersion, newVersion)
-		DevourmentNewDova.instance().Upgrade(oldVersion, newVersion)
 		RecalculateLocusCumulative()
 	endif
 endFunction
@@ -534,7 +527,6 @@ event onConfigOpen()
 	vomitActivated = false
 	flushActivated = false
 	resetBellies = false
-	resetWeights = false
 endEvent
 
 
@@ -547,11 +539,6 @@ event OnConfigClose()
 	if resetBellies
 		resetBellies = false
 		Manager.ResetBellies()
-	endIf
-
-	if resetWeights
-		resetWeights = false
-		WeightManager.ResetActorWeights()
 	endIf
 
 	If PerkMenuQueue == 1
@@ -568,15 +555,6 @@ event OnConfigClose()
 		endIf
 	EndIf
 	PerkMenuQueue = 0
-
-	If WeightManager.DoPreview != 0.0
-		If !WeightManager.PlayerEnabled
-			Debug.MessageBox("Devourment WeightManager Preview was called but you didn't enable Player weight morphs. Please enable this in the MCM.")
-		Else
-			WeightManager.ChangeActorWeight(PlayerRef, 0.0, source="Preview", preview=WeightManager.DoPreview)
-		EndIf
-	EndIf
-	WeightManager.DoPreview = 0.0
 
 endEvent
 
@@ -628,15 +606,8 @@ event OnPageReset(string page)
 		addToggleOptionSt("PredPerksState", "$DVT_ShowPredPerks", false)
 		addToggleOptionSt("PreyPerksState", "$DVT_ShowPreyPerks", false)
 		
-		if Manager.MicroMode
-			addTextOptionSt("CapacityInfoState",  "Devourment Capacity:   ", Manager.GetCapacity(target))
-		endIf
-		
-		if WeightManager.PlayerEnabled
-			addTextOption("Devourment Weight: ", WeightManager.GetWeightApprox(target))
-		endIf
+		addTextOptionSt("CapacityInfoState",  "Devourment Capacity:   ", Manager.GetCapacity(target))
 
-		addEmptyOption()
 		addTextOption("Swallow skill: ", swallowSkill)
 		addTextOption("Swallow resistance: ", swallowResistance)
 		addTextOption("Acid damage: ", acidDamage + " hp/sec")
@@ -654,12 +625,6 @@ event OnPageReset(string page)
 		addTextOption("Women", Manager.GetVictimType(target, "women"))
 		addTextOption("Men", Manager.GetVictimType(target, "men"))
 		addTextOption("Corpses", Manager.GetVictimType(target, "corpses"))
-
-		DevourmentNewDova newDova = DevourmentNewDova.instance()
-		if NewDova.prevDov > 0
-			addTextOption("Previous Dovahkiins: ", NewDova.prevDov)
-			addTextOption("Last Dovahkiin", NewDova.previousName)
-		endif
 
 		addEmptyOption()
 		addTextOption("RACE ", " DIGESTED")
@@ -742,48 +707,7 @@ event OnPageReset(string page)
 			addSliderOptionSt("Scaling_Locus5_MaxState", "$DVT_LocusMaximum", Morphs.Locus_Maxes[5], "{2}")
 			addSliderOptionSt("Chance_Locus5", "$DVT_LocusChance", LocusChances[5], "{2}")
 		endIf
-	ElseIf page == Pages[5]	;Female Weight
-
-		SetCursorFillMode(LEFT_TO_RIGHT)
-		If WeightManager.SkeletonScaling
-			addSliderOptionSt("WeightFemaleRootLowState", "$DVT_RootLow", WeightManager.fSkeletonLow, "{2}")
-			addSliderOptionSt("WeightFemaleRootHighState", "$DVT_RootHigh", WeightManager.fSkeletonHigh, "{2}")
-		EndIf
-		addInputOptionSt("WeightAddFemaleMorphState", "Add Female Morph", "")
-		AddEmptyOption()
-
-		;Female morphs span elements 0 through 31.
-		AddMorphQuads(WeightManager.MorphStrings, WeightManager.MorphsLow, WeightManager.MorphsHigh, 0, 32)
-
-	ElseIf page == Pages[6]	;Male Weight
-
-		SetCursorFillMode(LEFT_TO_RIGHT)
-		If WeightManager.SkeletonScaling
-			addSliderOptionSt("WeightMaleRootLowState", "$DVT_RootLow", WeightManager.mSkeletonLow, "{2}")
-			addSliderOptionSt("WeightMaleRootHighState", "$DVT_RootHigh", WeightManager.mSkeletonHigh, "{2}")
-		EndIf
-		addInputOptionSt("WeightAddMaleMorphState", "Add Male Morph", "")
-		AddEmptyOption()
-
-		; Male morphs span elements 32 through 63.
-		AddMorphQuads(WeightManager.MorphStrings, WeightManager.MorphsLow, WeightManager.MorphsHigh, 32, 32)
-
-	;/ To be uncommented once more creature WG sliders are done. TODO
-	ElseIf page == Pages[7]	;Creature Weight
-
-		SetCursorFillMode(LEFT_TO_RIGHT)
-		If WeightManager.SkeletonScaling
-			addSliderOptionSt("WeightCreatureRootLowState", "$DVT_RootLow", cSkeletonLow, "{2}")
-			addSliderOptionSt("WeightCreatureRootHighState", "$DVT_RootHigh", cSkeletonHigh, "{2}")
-		EndIf
-		addInputOptionSt("WeightAddCreatureMorphState", "Add Creature Morph", "")
-		AddEmptyOption()
-
-		; Creature morphs span elements 64 through 95.
-		AddMorphQuads(WeightManager.MorphStrings, WeightManager.MorphsLow, WeightManager.MorphsHigh, 64, 32)
-	/;
-
-	ElseIf page == Pages[8]
+	ElseIf page == Pages[6]
 		SetCursorFillMode(LEFT_TO_RIGHT)
 
 		if SKSE.GetVersion()
@@ -808,7 +732,7 @@ event OnPageReset(string page)
 		endIf
 		/;
 
-		AddSKSEDetails("SSEEngineFixes", "EngineFixes plugin", "EngineFixes plugin")
+		;AddSKSEDetails("SSEEngineFixes", "EngineFixes plugin", "EngineFixes plugin")
 		AddSKSEDetails("JContainers", "JContainers", "JContainers64", JContainers.FeatureVersion(), JContainers.APIVersion())
 		AddSKSEDetails("PapyrusUtil", "papyrusutil plugin", "papyrusutil", PapyrusUtil.GetVersion(), PapyrusUtil.GetScriptVersion())
 		AddSKSEDetails("ConsoleUtil", "console plugin", "ConsoleUtilSSE", ConsoleUtil.GetVersion())
@@ -823,93 +747,6 @@ event OnPageReset(string page)
 
 endEvent
 
-event OnOptionInputOpen(int oid)
-{ Old style event handling is used for the weightmanager morphs. }
-
-	parent.OnOptionInputOpen(oid)
-	if !AssertTrue(PREFIX, "OnOptionInputOpen", "JIntMap.HasKey(optionsMap, oid)", JIntMap.HasKey(optionsMap, oid))
-		return
-	endIf
-
-	String[] MorphStrings = WeightManager.MorphStrings
-	float[] MultLow = WeightManager.MorphsLow
-	float[] MultHigh = WeightManager.MorphsHigh
-
-	; Get the quad.
-	int oq = JIntMap.GetObj(optionsMap, oid)
-	if !AssertExists(PREFIX, "OnOptionInputOpen", "oq", oq)
-		return
-	endIf
-
-	int[] quad = JArray.asIntArray(oq)
-	int index = quad[0]
-	String morph = MorphStrings[index]
-
-	if oid == quad[1]
-		SetInputDialogStartText(MorphStrings[index])
-	elseif oid == quad[2]
-		SetInputDialogStartText(MultLow[index])
-	elseif oid == quad[3]
-		SetInputDialogStartText(MultHigh[index])
-	endIf
-endEvent
-
-
-event OnOptionInputAccept(int oid, string a_input)
-{ Old style event handling is used for the weightmanager morphs. }
-	parent.OnOptionInputAccept(oid, a_input)
-
-	if !AssertTrue(PREFIX, "OnOptionInputAccept", "JIntMap.hasKey(optionsMap, oid)", JIntMap.hasKey(optionsMap, oid))
-		return
-	endIf
-
-	String[] MorphStrings = WeightManager.MorphStrings
-	float[] MultLow = WeightManager.MorphsLow
-	float[] MultHigh = WeightManager.MorphsHigh
-
-	; Get the quad.
-	int oq = JIntMap.GetObj(optionsMap, oid)
-	if !AssertExists(PREFIX, "OnOptionInputAccept", "oq", oq)
-		return
-	endIf
-
-	int[] quad = JArray.asIntArray(oq)
-	int index = quad[0]
-	String morph = MorphStrings[index]
-
-	if oid == quad[1]
-		if a_input == ""
-			WeightManager.RemoveMorph(index)
-			ForcePageReset()
-		else
-			MorphStrings[index] = a_input
-			SetInputOptionValue(oid, a_input)
-		endIf
-
-	elseif oid == quad[2]
-		float val = a_input as float
-		MultLow[index] = val
-		SetInputOptionValue(oid, val)
-	
-	elseif oid == quad[3]
-		float val = a_input as float
-		MultHigh[index] = val
-		SetInputOptionValue(oid, val)
-	endIf
-
-	resetWeights = true
-endEvent
-
-
-Function SyncWeightManager(bool registration, bool reset)
-	if registration
-		WeightManager.EventRegistration()
-	endIf
-	if reset
-		resetWeights = true
-	endIf
-EndFunction
-
 
 Event OnPageSelect(string a_page)
     optionsMap = JValue.ReleaseAndRetain(optionsMap, JIntMap.Object(), PREFIX)
@@ -918,30 +755,6 @@ Event OnPageSelect(string a_page)
 		difficulty = checkDifficultyPreset()
 	endIf
 EndEvent
-
-
-Function AddMorphQuads(String[] morphNames, float[] multLow, float[] multHigh, int offset, int count)
-	int index = offset
-	int endpoint = offset + count
-
-	while index < endpoint
-		if morphNames[index] != ""
-			int[] quad = new int[4]
-			quad[0] = index
-			quad[1] = AddInputOption("Morph", morphNames[index])
-			AddEmptyOption()
-			quad[2] = AddInputOption("Low", multLow[index])
-			quad[3] = AddInputOption("High", multHigh[index])
-
-			int oQuad = JArray.objectWithInts(quad)
-			JIntMap.SetObj(optionsMap, quad[1], oQuad)
-			JIntMap.SetObj(optionsMap, quad[2], oQuad)
-			JIntMap.SetObj(optionsMap, quad[3], oQuad)
-		endIf
-
-		index += 1
-	endWhile
-EndFunction
 
 
 state PredPerksState
@@ -991,200 +804,6 @@ state PreyPerksState
 	endEvent
 endstate
 
-
-state WeightFemaleRootLowState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.fSkeletonLow)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(0.1, WeightManager.fSkeletonHigh)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.fSkeletonLow = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.fSkeletonLow = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_FemaleRootLow")
-	endEvent
-endState
-
-
-state WeightFemaleRootHighState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.fSkeletonHigh)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(WeightManager.fSkeletonLow, 5.0)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.fSkeletonHigh = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.fSkeletonHigh = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_FemaleRootHigh")
-	endEvent
-endState
-
-
-state WeightMaleRootLowState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.mSkeletonLow)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(0.1, WeightManager.mSkeletonHigh)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.mSkeletonLow = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.mSkeletonLow = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_MaleRootLow")
-	endEvent
-endState
-
-state WeightMaleRootHighState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.mSkeletonHigh)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(WeightManager.mSkeletonLow, 5.0)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.mSkeletonHigh = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.mSkeletonHigh = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_MaleRootHigh")
-	endEvent
-endState
-
-
-;/ To be uncommented once more creature WG sliders are done. TODO
-state WeightCreatureRootLowState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.cSkeletonLow)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(0.1, WeightManager.cSkeletonHigh)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.cSkeletonLow = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.cSkeletonLow = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_CreatureRootLow")
-	endEvent
-endState
-
-
-state WeightCreatureRootHighState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.cSkeletonHigh)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(WeightManager.cSkeletonLow, 5.0)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.cSkeletonHigh = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.cSkeletonHigh = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_CreatureRootHigh")
-	endEvent
-endState
-/;
-
-
-state WeightAddFemaleMorphState
-	event OnInputOpenST()
-		SetInputDialogStartText("")
-	endEvent
-
-	event OnInputAcceptST(string a_input)
-		WeightManager.AddMorph(a_input, 0.0, 0.0, 0)
-		ForcePageReset()
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("Add a female weight morph.")
-	endEvent
-endState
-
-
-state WeightAddMaleMorphState
-	event OnInputOpenST()
-		SetInputDialogStartText("")
-	endEvent
-
-	event OnInputAcceptST(string a_input)
-		WeightManager.AddMorph(a_input, 0.0, 0.0, 1)
-		ForcePageReset()
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("Add a male weight morph.")
-	endEvent
-endState
-
-
-;/ To be uncommented once more creature WG sliders are done. TODO
-state WeightAddCreatureMorphState
-	event OnInputOpenST()
-		SetInputDialogStartText("")
-	endEvent
-
-	event OnInputAcceptST(string a_input)
-		WeightManager.AddMorph(a_input, 0.0, 0.0, 2)
-		ForcePageReset()
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("Add a creature weight morph.")
-	endEvent
-endState
-/;
 
 state Scaling_Locus0State
 	Event OnSliderOpenST()
@@ -2224,7 +1843,6 @@ Function AddPredContents(UIListMenu menu, int parentEntry, Actor pred)
 		endWhile
 	endIf
 EndFunction
-
 
 Function AddBolusContents(UIListMenu menu, int parentEntry, ObjectReference bolus)
 	Form[] bolusContents = bolus.GetContainerForms()

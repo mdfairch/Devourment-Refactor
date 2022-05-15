@@ -225,7 +225,6 @@ Actor Function SearchForPrey_Player()
 			endif
 			i += 1
 		endwhile
-		;potentialPrey = LibFire.FindNearbyTeammates(ScanRange)
 	else
 		NearbyObjects = PO3_SKSEFunctions.FindAllReferencesOfFormType(PlayerRef,62,ScanRange)
 		int i = NearbyObjects.Length
