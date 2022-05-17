@@ -113,16 +113,16 @@ event OnConfigInit()
 	Pages = new string[7]
 	Pages[0] = "$DVT_Page_StatsSkills"
 	Pages[1] = "$DVT_Page_General"
-	Pages[2] = "$DVT_Page_VisualSoundMisc"
-	Pages[3] = "$DVT_Page_LocusMorphs"
-	Pages[4] = "$DVT_Page_WeightSettings"
+	Pages[2] = "$DVT_Page_WhoCanPred"
+	Pages[3] = "$DVT_Page_VisualSoundMisc"
+	Pages[4] = "$DVT_Page_LocusMorphs"
 	Pages[5] = "$DVT_Page_Debugging"
 	Pages[6] = "$DVT_Page_Dependancies"
 
 	equipList = new string[3]
 	equipList[0] = "$DVT_EquipNone"
-	equipList[1] = "$DVT_EquipMacross"
-	equipList[2] = "$DVT_EquipSkeptic"
+	equipList[1] = "$DVT_EquipMacross"	;Macross is the one I made
+	equipList[2] = "$DVT_EquipSkeptic" ;Uh, Skepticmech is the old Gat one
 endEvent
 
 
@@ -638,7 +638,25 @@ event OnPageReset(string page)
 
 		addTextOption("Others digested: ", Manager.GetVictimType(target, "other"))
 
-	ElseIf page == Pages[3]
+	ElseIf page == Pages[2]
+		AddToggleOptionST("FemalePredatorsState", "$DVT_FemPred", Manager.femalePreds)
+		AddToggleOptionST("MalePredatorsState", "$DVT_MalePred", Manager.malePreds)
+		AddToggleOptionST("CreaturePredatorsState", "$DVT_creaturePred", Manager.creaturePreds)
+
+		If Manager.CreaturePreds
+			Int i = 0
+			Int iLength = Manager.CreaturePredatorStrings.Length
+			While i < iLength
+				Int[] double = new Int[2]
+				double[0] = i
+				double[1] = AddToggleOption(Manager.CreaturePredatorStrings[i], Manager.CreaturePredatorToggles[i])
+				int oDouble = JArray.objectWithInts(double)
+				JIntMap.SetObj(optionsMap, double[1], oDouble)
+				i += 1
+			EndWhile
+		EndIf
+
+	ElseIf page == Pages[4]
 
 		setCursorPosition(0)
 		addMenuOptionSt("equipBellyState", "$DVT_EquipableBelly", equipList[Morphs.EquippableBellyType])
@@ -754,6 +772,35 @@ Event OnPageSelect(string a_page)
 	if difficulty < 5
 		difficulty = checkDifficultyPreset()
 	endIf
+EndEvent
+
+
+Event OnOptionSelect(int a_option)
+
+	parent.OnOptionSelect(a_option)
+
+	if !AssertTrue(PREFIX, "OnOptionSelect", "JIntMap.hasKey(optionsMap, a_option)", JIntMap.hasKey(optionsMap, a_option))
+		return
+	endIf
+
+	; Get the quad.
+	int od = JIntMap.GetObj(optionsMap, a_option)
+	if !AssertExists(PREFIX, "OnOptionSelect", "od", od)
+		return
+	endIf
+
+	int[] double = JArray.asIntArray(od)
+	int index = double[0]
+
+	If a_option == double[1]
+		If Manager.CreaturePredatorToggles[index] == 0
+			Manager.CreaturePredatorToggles[index] = 1
+		Else
+			Manager.CreaturePredatorToggles[index] = 0
+		EndIf
+		ForcePageReset()
+	EndIf
+
 EndEvent
 
 
