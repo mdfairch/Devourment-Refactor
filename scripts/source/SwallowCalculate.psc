@@ -61,6 +61,10 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 		prey = akCaster
 	endif
 
+	if !Manager.validPredator(pred)
+		Return
+	EndIf
+
 	if DEBUGGING
 		Log5(PREFIX, "OnEffectStart", Namer(pred), Namer(prey), endo, Reversed, Scripted)
 	endIf
@@ -321,7 +325,7 @@ EndFunction
 
 Function PlayVoreAnimation_Actor()
 	{ Attempts to play an appropriate vore animation.  }
-	int FNISDetected = Game.GetPlayer().GetAnimationVariableInt("DevourmentAnimationVersion")
+	int FNISDetected = Manager.FNISDetected as Int
 	bool complexAnimation = FNISDetected > 0 && (pred != playerRef || Game.GetCameraState() > 0)
 
 	if DEBUGGING

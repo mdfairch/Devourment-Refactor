@@ -641,15 +641,35 @@ event OnPageReset(string page)
 	ElseIf page == Pages[2]
 		AddToggleOptionST("FemalePredatorsState", "$DVT_FemPred", Manager.femalePreds)
 		AddToggleOptionST("MalePredatorsState", "$DVT_MalePred", Manager.malePreds)
+		Int i = 0
+		Int iLength = Manager.PredatorWhitelist.Length
+		while i < iLength
+			Int[] whitelistDouble = new Int[2]
+			whitelistDouble[0] = i + 300 ;Offset so we can differentiate this and creatures since same page.
+			whitelistDouble[1] = AddTextOption(Manager.PredatorWhitelist[i].GetLeveledActorBase().GetName(), "Remove?")	;OID
+			int owhitelistDouble = JArray.objectWithInts(whitelistDouble)
+			JIntMap.SetObj(optionsMap, whitelistDouble[1], owhitelistDouble)
+			i += 1 
+		endWhile
+
+		setCursorPosition(1)
 		AddToggleOptionST("CreaturePredatorsState", "$DVT_creaturePred", Manager.creaturePreds)
 
-		If Manager.CreaturePreds
-			Int i = 0
-			Int iLength = Manager.CreaturePredatorStrings.Length
+		If Manager.CreaturePreds ;&& rebuildCreatureMenu
+			i = 0
+			iLength = Manager.CreaturePredatorRaces.Length
 			While i < iLength
 				Int[] double = new Int[2]
-				double[0] = i
-				double[1] = AddToggleOption(Manager.CreaturePredatorStrings[i], Manager.CreaturePredatorToggles[i])
+				double[0] = i	;POSITION
+				String Name = Manager.CreaturePredatorRaces[i].GetName()
+				if i == 2	;This is a frustrating workaround but it's better than space wasted with string array.
+					Name = "Dragon"
+				elseif i == 28
+					Name = "Chicken"
+				elseif i == 34
+					Name = "Lurker"
+				endif
+				double[1] = AddToggleOption(Name, Manager.CreaturePredatorToggles[i])	;OID
 				int oDouble = JArray.objectWithInts(double)
 				JIntMap.SetObj(optionsMap, double[1], oDouble)
 				i += 1
@@ -755,7 +775,7 @@ event OnPageReset(string page)
 		AddSKSEDetails("PapyrusUtil", "papyrusutil plugin", "papyrusutil", PapyrusUtil.GetVersion(), PapyrusUtil.GetScriptVersion())
 		AddSKSEDetails("ConsoleUtil", "console plugin", "ConsoleUtilSSE", ConsoleUtil.GetVersion())
 		AddSKSEDetails("PO3 Papyrus Extender", "PapyrusExtender", "powerofthree's Papyrus Extender")
-		AddSKSEDetails("PO3 SPID", "powerofthree's Spell Perk Distributor", "powerofthree's Spell Perk Distributor")
+		;AddSKSEDetails("PO3 SPID", "powerofthree's Spell Perk Distributor", "powerofthree's Spell Perk Distributor")
 		;AddSKSEDetails("LibFire", "LibFire", "LibFire")
 		AddSKSEDetails("MCM Helper", "MCMHelper", "MCMHelper")
 		AddSKSEDetails("NIOverride", "NIOverride", "skee", NIOverride.GetScriptVersion())
@@ -783,25 +803,83 @@ Event OnOptionSelect(int a_option)
 		return
 	endIf
 
-	; Get the quad.
-	int od = JIntMap.GetObj(optionsMap, a_option)
-	if !AssertExists(PREFIX, "OnOptionSelect", "od", od)
-		return
-	endIf
+	If CurrentPage == Pages[2]
+		; Get the double.
+		int od = JIntMap.GetObj(optionsMap, a_option)
+		if !AssertExists(PREFIX, "OnOptionSelect", "od", od)
+			return
+		endIf
 
-	int[] double = JArray.asIntArray(od)
-	int index = double[0]
+		int[] double = JArray.asIntArray(od)
+		int index = double[0]
 
-	If a_option == double[1]
-		If Manager.CreaturePredatorToggles[index] == 0
-			Manager.CreaturePredatorToggles[index] = 1
+		If index < 300
+			If a_option == double[1]
+				If Manager.CreaturePredatorToggles[index] == 0
+					Manager.CreaturePredatorToggles[index] = 1
+				Else
+					Manager.CreaturePredatorToggles[index] = 0
+				EndIf
+				SetToggleOptionValue(double[1], Manager.CreaturePredatorToggles[index] as Bool, false)
+			EndIf
 		Else
-			Manager.CreaturePredatorToggles[index] = 0
+			Manager.PredatorWhitelist = PapyrusUtil.RemoveActor(Manager.PredatorWhitelist, Manager.PredatorWhitelist[index - 300])
+			ForcePageReset()
 		EndIf
-		ForcePageReset()
 	EndIf
 
 EndEvent
+
+state MalePredatorsState
+	event OnDefaultST()
+		Manager.malePreds = true
+		setToggleOptionValueST(Manager.malePreds)
+	endEvent
+
+	event OnSelectST()
+		Manager.malePreds = !Manager.malePreds
+		setToggleOptionValueST(Manager.malePreds)
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("Enables vore options for male humanoids.")
+	endEvent
+endstate
+
+
+state FemalePredatorsState
+	event OnDefaultST()
+		Manager.femalePreds = true
+		setToggleOptionValueST(Manager.femalePreds)
+	endEvent
+
+	event OnSelectST()
+		Manager.femalePreds = !Manager.femalePreds
+		setToggleOptionValueST(Manager.femalePreds)
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("Enables vore options for female humanoids.")
+	endEvent
+endstate
+
+
+state CreaturePredatorsState
+	event OnDefaultST()
+		Manager.creaturePreds = true
+		setToggleOptionValueST(Manager.creaturePreds)
+	endEvent
+
+	event OnSelectST()
+		Manager.creaturePreds = !Manager.creaturePreds
+		setToggleOptionValueST(Manager.creaturePreds)
+		ForcePageReset()
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("Enables vore options for animals, monsters, and other creatures.")
+	endEvent
+endstate
 
 
 state PredPerksState

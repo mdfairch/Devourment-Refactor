@@ -8,6 +8,9 @@ String property RaceRemaps = "..\\devourment\\raceRemaps.json" autoreadonly
 String PREFIX = "DevourmentRemap"
 
 
+;Gaz note. We used to only use RemapRaceName() but recently my Predator Toggles have encountered strange bugs I cannot resolve.
+;I am switching to using Races for my lists and using only RemapRace(). 
+;Other systems that use RemapRaceName() may have edge-case bugs like Glenmoril Witches showing as Hagravens. Monitor this.
 Race Function RemapRace(Race from)
 	int index = RemapFrom.Find(from)
 	if index >= 0
@@ -25,5 +28,6 @@ String Function RemapRaceName(Actor target)
 	Log4(PREFIX, "RemapRace", Namer(target), raceName, remapName, statName)
 	return statName
 EndFunction
+
 
 

@@ -73,9 +73,15 @@
 					"ignoreConflicts": false
 				},
 				{
+					"id": "WhitelistHotkey",
+					"text": "$DVT_WhitelistKey",
+					"type": "keymap",
+					"help": "$DVT_Help_WhitelistKey",
+					"ignoreConflicts": false
+				},
+				{
 					"type": "empty"
 				},
-
 				{
 					"text": "$DVT_Header_Skulls",
 					"type": "header"
@@ -571,6 +577,12 @@
 						"defaultValue": true
 					}
 				}
+			]
+		},
+		{
+			"pageDisplayName": "$DVT_Page_WhoCanPred",
+			"cursorFillMode": "topToBottom",
+			"content": [
 			]
 		},
 		{

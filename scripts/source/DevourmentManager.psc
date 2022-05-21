@@ -125,6 +125,7 @@ Keyword property VoreTalker auto
 Keyword property Vorish auto
 Keyword[] property RaceDigestionKeywords auto
 Message property MenuPreyWeight auto
+Message property MenuWhitelist auto
 Message property Message_NowDigesting auto
 Message property Message_Vomited auto
 Message property UnclogMessage auto
@@ -138,8 +139,10 @@ ObjectReference property HerStomach auto
 Outfit property DigestionOutfit auto
 PlayerVampireQuestScript property PlayerVampireQuest auto
 Race property Dragon auto
+Race[] property CreaturePredatorRaces auto
 ReferenceAlias property PredNameAlias auto
 ReferenceAlias property PreyNameAlias auto
+ReferenceAlias property WhitelistNameAlias auto
 SoulGem[] property Soulgems auto
 Sound property BoneSound_Female auto
 Sound property BoneSound_Male auto
@@ -160,7 +163,6 @@ Spell property ScriptedVore auto
 Spell property CordycepsFrenzy auto
 Spell[] property SoundsOfDigestion auto
 Spell[] property StatusSpells auto
-String[] property CreaturePredatorStrings auto
 String[] property Skills auto
 int[] property EdibleTypes auto
 
@@ -4343,6 +4345,19 @@ Function ResetActor(Actor target, ObjectReference place)
 EndFunction
 
 
+Function WhitelistPredator()
+	ObjectReference targeted = Game.GetCurrentCrossHairRef()
+	If targeted as Actor
+		WhitelistNameAlias.ForceRefTo(targeted)
+		Int Choice = MenuWhitelist.Show()
+		If Choice == 0
+			PredatorWhitelist = PapyrusUtil.PushActor(PredatorWhitelist, targeted as Actor)
+		EndIf
+		WhitelistNameAlias.Clear()
+	EndIf
+EndFunction
+
+
 Function HotkeyDialogue()
 	PlayerAlias.HotkeyDialogue()
 EndFunction
@@ -4645,10 +4660,14 @@ bool Function validPredator(Actor target)
 	If PredatorWhitelist.find(target)
 		return true
 	EndIf
-    If target.hasKeyword(ActorTypeCreature)
-		String raceName = Remapper.RemapRaceName(target)
-		int index = CreaturePredatorStrings.Find(raceName)
-		return index >= 0 && CreaturePredatorToggles[index] && creaturePreds
+    If target.hasKeyword(ActorTypeCreature) && creaturePreds
+		Log1(PREFIX, "validPredator", "Got past creaturepreds: " + creaturePreds)
+		Race baseRace = Remapper.RemapRace(target.GetLeveledActorBase().getRace())
+		Log1(PREFIX, "validPredator", "Got past baserace: " + baseRace)
+		int index = CreaturePredatorRaces.Find(baseRace)
+		Log1(PREFIX, "validPredator", "Got past index: " + index)
+		Log1(PREFIX, "validPredator", "Now deciding: " + CreaturePredatorToggles[index])
+		return index >= 0 && CreaturePredatorToggles[index]
 	elseIf target.HasKeyword(ActorTypeNPC)
 		int sex = target.getLeveledActorBase().getSex()	;We only care for Sex where humanoids are concerned.
 		return (sex == 0 && MalePreds) || (sex != 0 && FemalePreds)
