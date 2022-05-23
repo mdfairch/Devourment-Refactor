@@ -5,8 +5,8 @@
         <Member name="DevourmentSE - CBBE 3BA AllSliders-EquipBelly"/>
         <Member name="DevourmentSE - CBBE AllSliders"/>
         <Member name="DevourmentSE - CBBE AllSliders-EquipBelly"/>
-        <Member name="DevourmentSE - MacrossBellyF"/>
-        <Member name="DevourmentSE - MacrossBellyF-VoreOnly"/>
+        <Member name="DevourmentSE - RefactorBellyF"/>
+        <Member name="DevourmentSE - RefactorBellyF-VoreOnly"/>
     </Group>
     <Group name="Devourment Creatures">
         <Member name="DevourmentSE - Bear"/>
@@ -58,8 +58,6 @@
     <Group name="Devourment EquipBellies">
         <Member name="DevourmentSE - CBBE 3BA AllSliders-EquipBelly"/>
         <Member name="DevourmentSE - CBBE AllSliders-EquipBelly"/>
-        <Member name="DevourmentSE - MacrossBellyF"/>
-        <Member name="DevourmentSE - MacrossBellyM"/>
         <Member name="DevourmentSE - Male AllSliders-EquipBelly"/>
         <Member name="DevourmentSE - Male Feet"/>
         <Member name="DevourmentSE - Male Hands"/>
@@ -69,13 +67,16 @@
         <Member name="DevourmentSE - Male VectorPlexus"/>
         <Member name="DevourmentSE - Male VectorPlexusMuscular"/>
         <Member name="DevourmentSE - TBD AllSliders-EquipBelly"/>
-        <Member name="DevourmentSE - MacrossBellyTBD"/>
+        <Member name="DevourmentSE - RefactorBellyF"/>
+        <Member name="DevourmentSE - RefactorBellyM"/>
+        <Member name="DevourmentSE - RefactorBellyTBD"/>
+        <Member name="DevourmentSE - ClassicStruggleBelly"/>
     </Group>
     <Group name="Devourment EquipBellies-NoSliders">
-        <Member name="DevourmentSE - MacrossBellyF-VoreOnly"/>
-        <Member name="DevourmentSE - MacrossBellyM-VoreOnly"/>
-        <Member name="DevourmentSE - MacrossBellyTBD-VoreOnly"/>
-        <Member name="DevourmentSE - SkepticMech-StruggleBelly"/>
+        <Member name="DevourmentSE - RefactorBellyF-VoreOnly"/>
+        <Member name="DevourmentSE - RefactorBellyM-VoreOnly"/>
+        <Member name="DevourmentSE - RefactorBellyTBD-VoreOnly"/>
+        <Member name="DevourmentSE - ClassicStruggleBelly"/>
     </Group>
     <Group name="Devourment MorphBellies">
         <Member name="DevourmentSE - CBBE 3BA AllSliders"/>
@@ -91,8 +92,6 @@
         <Member name="DevourmentSE - TBD AllSliders"/>
     </Group>
     <Group name="SoS">
-        <Member name="DevourmentSE - MacrossBellyM"/>
-        <Member name="DevourmentSE - MacrossBellyM-VoreOnly"/>
         <Member name="DevourmentSE - Male AllSliders"/>
         <Member name="DevourmentSE - Male AllSliders-EquipBelly"/>
         <Member name="DevourmentSE - Male Feet"/>
@@ -102,6 +101,8 @@
         <Member name="DevourmentSE - Male Underwear"/>
         <Member name="DevourmentSE - Male VectorPlexus"/>
         <Member name="DevourmentSE - Male VectorPlexusMuscular"/>
+        <Member name="DevourmentSE - RefactorBellyM"/>
+        <Member name="DevourmentSE - RefactorBellyM-VoreOnly"/>
     </Group>
     <Group name="TBD Bodies">
         <Member name="DevourmentSE - TBD AllSliders"/>

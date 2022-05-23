@@ -3,7 +3,7 @@ Name = "Prey"
 
 # Description of skill will appear in custom perks menu under the name and level, set "" to clear it
 # if you don't want to show anything
-Description = ""
+Description = "Vore Skills for Prey"
 
 # Custom background nif, INTVampirePerkSkydome.nif is showing the werewolf background, if you use custom
 # nif you made it must have some nodes and images, recommended is to edit this nif instead of creating
@@ -60,7 +60,7 @@ DebugReloadId = 0xCC2
 # Node0 is the root node, this should not have coordinates or a perk assigned to it. This must exist even if you don't want to have any perks.
 # Use Node0.Links to point to first perk(s). If you don't want any perks then remove the links line or set to ""
 Node0.Enable = true
-Node0.Links = "1 2 3 4 8"
+Node0.Links = "1, 2, 3, 4, 8"
 
 # Actual perks begin from here. When you are making a condition on perk for specific level of skill required instead of GetBaseActorValue use GetGlobalValue
 # for the global variable you set in the "Level" option. This will generate correct requirement description in-game.
@@ -121,7 +121,6 @@ Node4.X = 0
 Node4.Y = 0
 Node4.GridX = 1
 Node4.GridY = 0
-Node4.Links = ""
 
 
 ########### ROW 1 ###########
@@ -156,7 +155,6 @@ Node7.X = 0
 Node7.Y = 0
 Node7.GridX = 2
 Node7.GridY = 3
-Node7.Links = ""
 
 
 # Delicious
@@ -178,7 +176,6 @@ Node10.X = 0
 Node10.Y = 0
 Node10.GridX = 2
 Node10.GridY = 2
-Node10.Links = ""
 
 ########### ROW 3 ###########
 
@@ -190,5 +187,3 @@ Node11.X = 0
 Node11.Y = 0
 Node11.GridX = 3
 Node11.GridY = 1
-Node11.Links = ""
-

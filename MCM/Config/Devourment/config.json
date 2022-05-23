@@ -80,9 +80,6 @@
 					"ignoreConflicts": false
 				},
 				{
-					"type": "empty"
-				},
-				{
 					"text": "$DVT_Header_Skulls",
 					"type": "header"
 				},
@@ -533,10 +530,6 @@
 						"defaultValue": 0
 					}	
 				},
-				{
-					"type": "empty"
-				},
-
 				{
 					"text": "$DVT_Header_WhoGetsDigested",
 					"type": "header"

@@ -121,8 +121,8 @@ event OnConfigInit()
 
 	equipList = new string[3]
 	equipList[0] = "$DVT_EquipNone"
-	equipList[1] = "$DVT_EquipMacross"	;Macross is the one I made
-	equipList[2] = "$DVT_EquipSkeptic" ;Uh, Skepticmech is the old Gat one
+	equipList[1] = "$DVT_EquipMacross"	;"Macross is the one I made"
+	equipList[2] = "$DVT_EquipSkeptic" ;"Skepticmech is the old Gat one"
 endEvent
 
 
@@ -603,8 +603,9 @@ event OnPageReset(string page)
 		preySkillInfo = addTextOption("Devourment prey skill: ", preySkill)
 		addTextOption("Devourment level: ", Manager.GetVoreLevel(target))
 		addTextOption("Devourment perk points: ", perkPoints)
-		addToggleOptionSt("PredPerksState", "$DVT_ShowPredPerks", false)
-		addToggleOptionSt("PreyPerksState", "$DVT_ShowPreyPerks", false)
+		;Disabled for now, as Minimalistic Custom Skills Menu for AE cannot make use of them.
+		;addToggleOptionSt("PredPerksState", "$DVT_ShowPredPerks", false)
+		;addToggleOptionSt("PreyPerksState", "$DVT_ShowPreyPerks", false)
 		
 		addTextOptionSt("CapacityInfoState",  "Devourment Capacity:   ", Manager.GetCapacity(target))
 
