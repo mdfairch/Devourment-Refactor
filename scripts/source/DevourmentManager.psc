@@ -4656,17 +4656,15 @@ EndFunction
 bool Function validPredator(Actor target)
 	If target == None || target.isChild()
 		return false
-	EndIf
-	If PredatorWhitelist.find(target)
+	ElseIf PredatorWhitelist.find(target) >= 0
 		return true
-	EndIf
-    If target.hasKeyword(ActorTypeCreature) && creaturePreds
-		Log1(PREFIX, "validPredator", "Got past creaturepreds: " + creaturePreds)
+    ElseIf target.hasKeyword(ActorTypeCreature) && creaturePreds
+		Log1(PREFIX, "validPredator()", "Got past creaturepreds: " + creaturePreds)
 		Race baseRace = Remapper.RemapRace(target.GetLeveledActorBase().getRace())
-		Log1(PREFIX, "validPredator", "Got past baserace: " + baseRace)
-		int index = CreaturePredatorRaces.Find(baseRace)
-		Log1(PREFIX, "validPredator", "Got past index: " + index)
-		Log1(PREFIX, "validPredator", "Now deciding: " + CreaturePredatorToggles[index])
+		Log1(PREFIX, "validPredator()", "Got past baserace: " + baseRace)
+		int index = CreaturePredatorRaces.Find(target.GetRace())
+		Log1(PREFIX, "validPredator()", "Got past index: " + index)
+		Log1(PREFIX, "validPredator()", "Now deciding: " + CreaturePredatorToggles[index])
 		return index >= 0 && CreaturePredatorToggles[index]
 	elseIf target.HasKeyword(ActorTypeNPC)
 		int sex = target.getLeveledActorBase().getSex()	;We only care for Sex where humanoids are concerned.

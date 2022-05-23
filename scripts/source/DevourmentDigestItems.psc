@@ -193,9 +193,9 @@ bool Function DigestItem(Actor caster, DevourmentBolus bolus, Form item, int cou
 	elseif tummyBanking && item != Gold
 		bolus.RemoveItem(item, count, true)
 		int goldValue = item.GetGoldValue()
-		int totalGold = 1 + count * goldValue / 2
+		int totalGold = (1 + count) * goldValue / 2
 
-		destination.AddItem(Gold, goldValue, true)
+		destination.AddItem(Gold, totalGold, true)
 		Log5(PREFIX, "DigestItem", "Banked", goldValue, count, totalGold, Namer(item))
 		return true
 		

@@ -149,6 +149,7 @@ bool Function SwallowSkull(Actor pred, DevourmentSkullObject skullRef, int locus
 		return false
 	endIf
 	
+	;/
 	; For the player, get a suitable proxy.
 	if revivee == PlayerRef
 		Actor deadDovaRef = DevourmentNewDova.instance().deadDovaRef
@@ -158,6 +159,7 @@ bool Function SwallowSkull(Actor pred, DevourmentSkullObject skullRef, int locus
 			return false
 		endIf
 	endIf
+	/;
 
 	Log0(PREFIX, "SwallowSkull")
 	

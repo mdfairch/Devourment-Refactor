@@ -42,9 +42,7 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 	doBleedoutVore = !Game.IsPluginInstalled("SexLabDefeat.esp")
 	doCorpseVore = pred.IsInFaction(CorpseVore)
 
-	if pred.IsPlayerTeammate()
-		cooldownTime = Manager.Cooldown_Follower
-	elseif pred.HasKeywordString("ActorTypeNPC")
+	if pred.HasKeywordString("ActorTypeNPC")
 		cooldownTime = Manager.Cooldown_NPC
 	else
 		cooldownTime = Manager.Cooldown_Creature
@@ -197,6 +195,9 @@ bool Function DoANom(Actor prey)
 	Print out appropriate debugging messages.
 }
 	if !AssertNotNone(PREFIX, "DoANom", "prey", prey)
+		return false
+
+	elseif !Manager.validPredator(pred)
 		return false
 
 	elseif !isWeakened(prey)
