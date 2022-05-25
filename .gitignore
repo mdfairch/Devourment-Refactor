@@ -1,5 +1,8 @@
 .vscode/tasks.json
 DevourmentRefactor.ppj
 Devourment*.7z
+Devourment*.rar
 ListFile
 Build.ps1
+Devourment Documentation/NOTICE
+Devourment Documentation/LICENSE
