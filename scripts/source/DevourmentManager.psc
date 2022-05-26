@@ -1831,6 +1831,8 @@ function AbsorbRemains(Actor pred, ObjectReference content, int preyData)
 	endIf
 
 	if content as Actor
+		ConsoleUtil.SetSelectedReference(content as Actor)	;Fix brought to my attention by this mod: https://www.nexusmods.com/skyrimspecialedition/mods/62413?tab=description
+		ConsoleUtil.ExecuteCommand("unequipall")
 		content.removeAllItems(apex, false, true)
 		UnassignPreyMeters(content as Actor)
 		content.disable()
@@ -2184,6 +2186,8 @@ Removes a single dead content from the pred and places a scat pile or bones behi
 		endIf
 		
 		if prey != playerRef
+			ConsoleUtil.SetSelectedReference(prey)
+			ConsoleUtil.ExecuteCommand("unequipall")
 			prey.removeAllItems(pile, false, true)
 		else
 			; Move the player (who is still both invisible and dead) to the pile.
