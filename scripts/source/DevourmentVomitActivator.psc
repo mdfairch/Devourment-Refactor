@@ -87,6 +87,8 @@ Function vomitDead(Actor pred, Actor prey, int locus)
 	
 	if pred.HasPerk(HungryBones) && prey.HasKeywordString("ActorTypeNPC")
 		pile = VomitSkeleton(pred, prey, locus)
+		ConsoleUtil.SetSelectedReference(prey)
+		ConsoleUtil.ExecuteCommand("unequipall")
 	elseif Manager.VomitStyle == 1
 		pile = SpawnPuddle1(locus)
 	elseif Manager.VomitStyle == 2
