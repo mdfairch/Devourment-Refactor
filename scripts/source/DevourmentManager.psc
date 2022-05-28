@@ -198,6 +198,7 @@ float property AcidDamageModifier = 1.0 auto
 float property BurpsRate = 16.0 auto
 float property GurglesRate = 8.0 auto
 float property NPCBonus = 1.0 Auto
+float property WeightGain = 0.0 auto
 float property ItemBurping = 0.0 auto
 float property cameraShake = 0.0 auto
 float property preyExperienceRate = 2.0 auto
@@ -434,6 +435,7 @@ script. Instead it's called from DevourmentPlayerAlias.
 	RegisterForModEvent("Devourment_Burp", "PlayBurp")
 	RegisterForModEvent("Devourment_UpdateSounds", "UpdateSounds")
 	RegisterForModEvent("Devourment_Entitlement", "Entitlement")
+	RegisterForModEvent("Devourment_WeightGain", "WeightGain")
 	RegisterForModEvent("Devourment_OutfitRestore", "OutfitRestore")
 	
 	RegisterForSingleUpdate(UpdateInterval)
@@ -809,6 +811,7 @@ Event RegisterDigestion(Form f1, Form f2, bool endo, int locus)
 			endIf
 
 			if pred == playerRef || pred.GetActorBase().IsUnique()
+				WeightGain_async(pred, prey, true)
 				incrementVictimType(pred, "corpses")
 			endIf
 
@@ -1375,6 +1378,7 @@ function FinishLiveDigestion(Actor pred, Actor prey, int preyData)
 	if pred == playerRef || pred.GetActorBase().IsUnique()
 		incrementVictims(pred)
 		voreStats(pred, prey)
+		WeightGain_async(pred, prey, true)
 		VoreSkills_async(pred, prey)
 	endIf
 
@@ -1389,6 +1393,49 @@ function FinishLiveDigestion(Actor pred, Actor prey, int preyData)
 
 	SendDeathEvent(pred, prey)
 endFunction
+
+
+Function WeightGain_async(Actor pred, Actor prey, bool gain)
+{ Used to call WeightGain asynchronously using a ModEvent. }
+	if WeightGain > 0.0
+		int handle = ModEvent.create("Devourment_WeightGain")
+		ModEvent.pushForm(handle, pred)
+		ModEvent.pushForm(handle, prey)
+		ModEvent.pushBool(handle, gain)
+		ModEvent.Send(handle)
+	endIf
+EndFunction
+		
+		
+Event WeightGain(Form f1, Form f2, bool gain)
+	Actor pred = f1 as Actor
+	ActorBase predBase = pred.getLeveledActorBase()
+	
+	if WeightGain > 0.0
+		float oldweight = predBase.getWeight()
+		if oldweight < 100.0
+			float newWeight
+			if gain
+				newWeight = oldweight + WeightGain
+				if newWeight > 100.0
+					newWeight = 100.0
+				endIf
+			else
+				newWeight = oldweight - WeightGain
+				if newWeight < 0.0
+					newWeight = 0.0
+				endIf
+			endIf
+	
+			predBase.setWeight(newWeight)
+				
+			if !pred.IsOnMount()
+				pred.updateWeight(oldweight / 100 - newWeight / 100.0)
+				pred.QueueNiNodeUpdate()
+			endIf
+		endIf
+	endIf	
+EndEvent
 
 
 Function Entitlement_async(Actor pred, Actor prey)
@@ -2405,6 +2452,7 @@ Function ReformPrey(Actor pred, Actor prey, int preyData)
 		prey.RemoveFromFaction(prey.GetCrimeFaction())
 	endIf
 
+	WeightGain_Async(pred, prey, false)
 	DeactivatePrey(prey)
 	SetEndo(preyData, prey != playerRef && pred != playerRef)
 	SetMeters_Reformed(prey)
@@ -6732,6 +6780,7 @@ bool Function saveSettings(String settingsFileName)
 	JMap.setInt(data, "StomachStrip", 			StomachStrip as int)
 	JMap.setInt(data, "DrawnAnimations", 		DrawnAnimations as int)
 	JMap.setInt(data, "CrouchScat", 			CrouchScat as int)
+	JMap.setFlt(data, "WeightGain",				WeightGain)
 	JMap.setFlt(data, "ItemBurping",			ItemBurping)
 
 	JMap.setInt(data, "VomitStyle", 			VomitStyle)
@@ -6802,6 +6851,7 @@ bool Function loadSettings(String settingsFileName)
 	StomachStrip = 			JMap.getInt(data, "StomachStrip", 			StomachStrip as int) as bool
 	drawnAnimations = 		JMap.getInt(data, "drawnAnimations", 		drawnAnimations as int) as bool
 	crouchScat = 			JMap.getInt(data, "crouchScat", 			crouchScat as int) as bool
+	WeightGain = 			JMap.getFlt(data, "WeightGain", 			WeightGain)
 	ItemBurping = 			JMap.getFlt(data, "ItemBurping", 			ItemBurping)
 	VomitStyle = 			JMap.getInt(data, "VomitStyle", 			VomitStyle)
 	useHelpMessages = 		JMap.getInt(data, "useHelpMessages", 		useHelpMessages as int) as bool
