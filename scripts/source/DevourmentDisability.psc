@@ -14,7 +14,8 @@ String PREFIX = "DevourmentDisability"
 bool DEBUGGING = false
 Actor prey
 int preyData
-
+shout storedShout = none
+spell storedSpell = none
 
 Event OnEffectStart(Actor akTarget, Actor akCaster)
 { Adds the vomit shout, the disabled shout, and the disabled spell. }
@@ -30,7 +31,10 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 		dispel()
 		return
 	endIf
-	
+
+	storedShout = prey.GetEquippedShout()
+	storedSpell = prey.GetEquippedSpell(2)
+
 	Game.unlockWord(VomitWord)
 	prey.addShout(DummyShout)
 	prey.equipShout(DummyShout)
@@ -52,7 +56,15 @@ Event onEffectFinish(Actor akTarget, Actor akCaster)
 		prey.unequipShout(DummyShout)
 		prey.removeSpell(DummySpell)
 		prey.removeShout(DummyShout)
+		if storedSpell
+			prey.equipSpell(storedSpell, 2)
+		endIf
+		if storedShout
+			prey.equipShout(storedShout)
+		endIf
 	endIf
+	
+
 EndEvent
 
 

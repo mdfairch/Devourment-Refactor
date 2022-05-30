@@ -189,8 +189,12 @@ EndEvent
 
 
 Function DoSwallow()
-	if Reversed && pred == PlayerRef
-		Manager.HelpAgnosticMessage(Manager.Messages_Retrovore[locus], "DVT_RETROVORE", 10.0, 0.1)
+	if Reversed
+		If pred == PlayerRef
+			Manager.HelpAgnosticMessage(Manager.Messages_Retrovore[locus], "DVT_RETROVORE", 10.0, 0.1)
+		ElseIf prey == PlayerRef
+			Manager.notify(pred.GetDisplayName() + " is trying to force their way into your body!")
+		EndIf
 	endIf
 
 	pred.addSpell(SwallowPreventSpell, false)
