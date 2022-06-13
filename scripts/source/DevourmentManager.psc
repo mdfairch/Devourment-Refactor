@@ -100,7 +100,6 @@ GlobalVariable property Devourment_ShowPreyPerks auto
 GlobalVariable property PreyWeightEdit auto
 GlobalVariable[] property HealthMeterColours auto
 Idle Property IdleStop Auto
-Idle property IdleDragon auto
 Idle property IdleVore auto
 Int[] property CreaturePredatorToggles auto
 Keyword property ActorTypeAnimal auto
@@ -163,6 +162,7 @@ Spell property ScriptedVore auto
 Spell property CordycepsFrenzy auto
 Spell[] property SoundsOfDigestion auto
 Spell[] property StatusSpells auto
+Static Property AnimationMarker Auto
 String[] property Skills auto
 int[] property EdibleTypes auto
 

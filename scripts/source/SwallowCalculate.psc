@@ -330,6 +330,7 @@ EndFunction
 Function PlayVoreAnimation_Actor()
 	{ Attempts to play an appropriate vore animation.  }
 	int FNISDetected = Manager.FNISDetected as Int
+	DevourmentRemap remapper = (Manager as Quest) as DevourmentRemap
 	bool complexAnimation = FNISDetected > 0 && (pred != playerRef || Game.GetCameraState() > 0)
 
 	if DEBUGGING
@@ -339,10 +340,49 @@ Function PlayVoreAnimation_Actor()
 	endIf
 
 	if pred.hasKeywordString("ActorTypeDragon")
-		if prey && prey.hasKeywordString("ActorTypeNPC")
-			String anim = "pa_KillMove_Ground_Bite_Grapple"
-		endIf
+		if pred.GetAnimationVariableInt("DevourmentDragonAnimationVersion") > 0
+			;If prey.y - pred.y < 5.0 || prey.y - pred.y < -5.0	;So long as we're not too high or too low from each other
+			pred.SetAllowFlying(false)
+			Debug.SendAnimationEvent(pred, "FlyStopDefault")
+			Utility.Wait(0.1)
+
+			Debug.SendAnimationEvent(pred, "Reset")
+
+		ObjectReference PredMarker = Prey.PlaceAtMe(Manager.AnimationMarker, 1, false, false)
+		PredMarker.SetAngle(Prey.GetAngleX()+180.0, Prey.GetAngleY()+180.0, Prey.GetAngleZ()+180.0)
+		PredMarker.SetPosition(Prey.GetPositionX(), Prey.GetPositionY(), Prey.GetPositionZ())
+
+		ObjectReference PreyMarker = PredMarker.PlaceAtMe(Manager.AnimationMarker, 1, false, false)
+		PreyMarker.SetAngle(PredMarker.GetAngleX(), PredMarker.GetAngleY(), PredMarker.GetAngleZ())
+		PreyMarker.SetPosition(PredMarker.GetPositionX()+5.5, PredMarker.GetPositionY()+5.5, PredMarker.GetPositionZ()+5.55)
 		
+		pred.MoveTo(PredMarker)
+		pred.SetVehicle(PredMarker)
+		pred.TranslateTo(PredMarker.GetPositionX(), PredMarker.GetPositionY(), PredMarker.GetPositionZ(), PredMarker.GetAngleX(), PredMarker.GetAngleY(), PredMarker.GetAngleZ()+0.01, 500.0, 0.0001)
+
+		prey.MoveTo(PreyMarker)
+		prey.SetVehicle(PreyMarker)
+		prey.TranslateTo(PreyMarker.GetPositionX(), PreyMarker.GetPositionY(), PreyMarker.GetPositionZ(), PreyMarker.GetAngleX(), PreyMarker.GetAngleY(), PreyMarker.GetAngleZ()+0.01, 500.0, 0.0001)
+
+		pred.SetDontMove(True)		;Prevent NPCs from being pushed around by contact. Don't use on Player, locks camera.
+
+		if prey == PlayerRef
+			Game.ForceThirdPerson()
+		Else
+			prey.SetDontMove(True)
+		EndIf
+
+		utility.wait(0.35)
+				
+
+			;SetAnimationMarkers(5.5, 5.5, 5.55)
+			Debug.SendAnimationEvent(pred, "DragonVore_Dragon")
+			Debug.SendAnimationEvent(prey, "DragonVore_Human")
+
+			Utility.Wait(4.1)
+			pred.SetAllowFlying(true)
+		endif
+
 	elseif pred.hasKeywordString("ActorTypeNPC")
 
 		if !complexAnimation
@@ -355,7 +395,7 @@ Function PlayVoreAnimation_Actor()
 		
 			elseif prey.GetSleepState() > 2 ; Sleeping Vore
 				Debug.SendAnimationEvent(pred, "IdleCannibalFeedStanding")
-			
+			 
 			elseif Manager.GetVoreWeightRatio(pred, prey) > 0.25 ; Giant Vore
 				Debug.SendAnimationEvent(pred, "IdlePickup_Ground")
 
@@ -375,9 +415,9 @@ Function PlayVoreAnimation_Actor()
 				endIf
 			else
 				if locus == 0 ; OralVore
-					Debug.SendAnimationEvent(pred, "DevourA01")
-					;Debug.SendAnimationEvent(prey, "DevourA02")
-					Debug.SendAnimationEvent(prey, "IdleCowerEnter")
+						Debug.SendAnimationEvent(pred, "DevourA01")
+						;Debug.SendAnimationEvent(prey, "DevourA02")
+						Debug.SendAnimationEvent(prey, "IdleCowerEnter")
 				elseif locus == 1 ; AnalVore
 					Debug.SendAnimationEvent(pred, "IdleChairFrontEnter")
 					Debug.SendAnimationEvent(prey, "IdleCowerEnter")
@@ -389,7 +429,57 @@ Function PlayVoreAnimation_Actor()
 				endIf
 			endIf
 		endif
+	elseif Game.GetForm(0x000131FF) == remapper.RemapRace(pred.GetLeveledActorBase().GetRace())	;If Mammoth
+		if pred.GetAnimationVariableInt("DevourmentMammothAnimationVersion") > 0
+
+			Debug.SendAnimationEvent(pred, "Reset")
+
+			ObjectReference PredMarker = Prey.PlaceAtMe(Manager.AnimationMarker, 1, false, false)
+			PredMarker.SetAngle(Prey.GetAngleX()+180.0, Prey.GetAngleY()+180.0, Prey.GetAngleZ()+180.0)
+			PredMarker.SetPosition(Prey.GetPositionX(), Prey.GetPositionY(), Prey.GetPositionZ())
+
+			ObjectReference PreyMarker = PredMarker.PlaceAtMe(Manager.AnimationMarker, 1, false, false)
+			PreyMarker.SetAngle(PredMarker.GetAngleX(), PredMarker.GetAngleY(), PredMarker.GetAngleZ())
+			PreyMarker.SetPosition(PredMarker.GetPositionX()+0.0, PredMarker.GetPositionY()+0.0, PredMarker.GetPositionZ()+0.0)
+			
+			pred.MoveTo(PredMarker)
+			pred.SetVehicle(PredMarker)
+			pred.TranslateTo(PredMarker.GetPositionX(), PredMarker.GetPositionY(), PredMarker.GetPositionZ(), PredMarker.GetAngleX(), PredMarker.GetAngleY(), PredMarker.GetAngleZ()+0.01, 500.0, 0.0001)
+
+			prey.MoveTo(PreyMarker)
+			prey.SetVehicle(PreyMarker)
+			prey.TranslateTo(PreyMarker.GetPositionX(), PreyMarker.GetPositionY(), PreyMarker.GetPositionZ(), PreyMarker.GetAngleX(), PreyMarker.GetAngleY(), PreyMarker.GetAngleZ()+0.01, 500.0, 0.0001)
+
+			pred.SetDontMove(True)		;Prevent NPCs from being pushed around by contact. Don't use on Player, locks camera.
+
+			if prey == PlayerRef
+				Game.ForceThirdPerson()
+			Else
+				prey.SetDontMove(True)
+			EndIf
+
+			utility.wait(0.35)
+				
+			Debug.SendAnimationEvent(pred, "MammothVore_Mammoth")
+			Debug.SendAnimationEvent(prey, "MammothVore_Human")
+
+			Utility.Wait(4.0)
+		endif
+
+
 	endIf
+
+	pred.SetVehicle(None)
+	prey.SetVehicle(None)
+
+EndFunction
+
+
+Function SetAnimationMarkers(float preyXOffset, float preyYOffset, float preyZOffset)
+	{ Attempts to Sync up animations in a similar way to how SexLab does, by manually positioning actors with offsets dependant on animation desired. }
+
+	
+
 EndFunction
 
 

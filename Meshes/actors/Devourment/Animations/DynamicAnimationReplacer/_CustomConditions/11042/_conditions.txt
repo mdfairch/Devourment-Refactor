@@ -1,2 +1,0 @@
-HasKeyword("Skyrim.esm"| 0x00013794) AND
-IsInFaction("Devourment.esp"| 0x00000D29)
