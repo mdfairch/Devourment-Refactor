@@ -6782,7 +6782,8 @@ bool Function saveSettings(String settingsFileName)
 	JMap.setInt(data, "CrouchScat", 			CrouchScat as int)
 	JMap.setFlt(data, "WeightGain",				WeightGain)
 	JMap.setFlt(data, "ItemBurping",			ItemBurping)
-
+	
+	JMap.setInt(data, "endoAnyone", 			endoAnyone as int)
 	JMap.setInt(data, "VomitStyle", 			VomitStyle)
 	JMap.setInt(data, "UseHelpMessages", 		UseHelpMessages as int)
 	JMap.setInt(data, "Notifications", 			Notifications as int)
@@ -6853,6 +6854,8 @@ bool Function loadSettings(String settingsFileName)
 	crouchScat = 			JMap.getInt(data, "crouchScat", 			crouchScat as int) as bool
 	WeightGain = 			JMap.getFlt(data, "WeightGain", 			WeightGain)
 	ItemBurping = 			JMap.getFlt(data, "ItemBurping", 			ItemBurping)
+
+	endoAnyone = 			JMap.getInt(data, "endoAnyone", 			endoAnyone as int) as bool
 	VomitStyle = 			JMap.getInt(data, "VomitStyle", 			VomitStyle)
 	useHelpMessages = 		JMap.getInt(data, "useHelpMessages", 		useHelpMessages as int) as bool
 	notifications = 		JMap.getInt(data, "notifications", 			notifications as int) as bool

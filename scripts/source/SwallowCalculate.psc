@@ -341,41 +341,40 @@ Function PlayVoreAnimation_Actor()
 
 	if pred.hasKeywordString("ActorTypeDragon")
 		if pred.GetAnimationVariableInt("DevourmentDragonAnimationVersion") > 0
-			;If prey.y - pred.y < 5.0 || prey.y - pred.y < -5.0	;So long as we're not too high or too low from each other
+			
 			pred.SetAllowFlying(false)
 			Debug.SendAnimationEvent(pred, "FlyStopDefault")
 			Utility.Wait(0.1)
 
 			Debug.SendAnimationEvent(pred, "Reset")
 
-		ObjectReference PredMarker = Prey.PlaceAtMe(Manager.AnimationMarker, 1, false, false)
-		PredMarker.SetAngle(Prey.GetAngleX()+180.0, Prey.GetAngleY()+180.0, Prey.GetAngleZ()+180.0)
-		PredMarker.SetPosition(Prey.GetPositionX(), Prey.GetPositionY(), Prey.GetPositionZ())
+			ObjectReference PredMarker = Prey.PlaceAtMe(Manager.AnimationMarker, 1, false, false)
+			PredMarker.SetAngle(Prey.GetAngleX()+180.0, Prey.GetAngleY()+180.0, Prey.GetAngleZ()+180.0)
+			PredMarker.SetPosition(Prey.GetPositionX(), Prey.GetPositionY(), Prey.GetPositionZ())
 
-		ObjectReference PreyMarker = PredMarker.PlaceAtMe(Manager.AnimationMarker, 1, false, false)
-		PreyMarker.SetAngle(PredMarker.GetAngleX(), PredMarker.GetAngleY(), PredMarker.GetAngleZ())
-		PreyMarker.SetPosition(PredMarker.GetPositionX()+5.5, PredMarker.GetPositionY()+5.5, PredMarker.GetPositionZ()+5.55)
-		
-		pred.MoveTo(PredMarker)
-		pred.SetVehicle(PredMarker)
-		pred.TranslateTo(PredMarker.GetPositionX(), PredMarker.GetPositionY(), PredMarker.GetPositionZ(), PredMarker.GetAngleX(), PredMarker.GetAngleY(), PredMarker.GetAngleZ()+0.01, 500.0, 0.0001)
+			ObjectReference PreyMarker = PredMarker.PlaceAtMe(Manager.AnimationMarker, 1, false, false)
+			PreyMarker.SetAngle(PredMarker.GetAngleX(), PredMarker.GetAngleY(), PredMarker.GetAngleZ())
+			PreyMarker.SetPosition(PredMarker.GetPositionX()+5.5, PredMarker.GetPositionY()+5.5, PredMarker.GetPositionZ()+5.55)
+			
+			pred.MoveTo(PredMarker)
+			pred.SetVehicle(PredMarker)
+			pred.TranslateTo(PredMarker.GetPositionX(), PredMarker.GetPositionY(), PredMarker.GetPositionZ(), PredMarker.GetAngleX(), PredMarker.GetAngleY(), PredMarker.GetAngleZ()+0.01, 500.0, 0.0001)
 
-		prey.MoveTo(PreyMarker)
-		prey.SetVehicle(PreyMarker)
-		prey.TranslateTo(PreyMarker.GetPositionX(), PreyMarker.GetPositionY(), PreyMarker.GetPositionZ(), PreyMarker.GetAngleX(), PreyMarker.GetAngleY(), PreyMarker.GetAngleZ()+0.01, 500.0, 0.0001)
+			prey.MoveTo(PreyMarker)
+			prey.SetVehicle(PreyMarker)
+			prey.TranslateTo(PreyMarker.GetPositionX(), PreyMarker.GetPositionY(), PreyMarker.GetPositionZ(), PreyMarker.GetAngleX(), PreyMarker.GetAngleY(), PreyMarker.GetAngleZ()+0.01, 500.0, 0.0001)
 
-		pred.SetDontMove(True)		;Prevent NPCs from being pushed around by contact. Don't use on Player, locks camera.
+			pred.SetDontMove(True)		;Prevent NPCs from being pushed around by contact. Don't use on Player, locks camera.
 
-		if prey == PlayerRef
-			Game.ForceThirdPerson()
-		Else
-			prey.SetDontMove(True)
-		EndIf
+			if prey == PlayerRef
+				Game.ForceThirdPerson()
+				;Game.SetPlayerAIDriven() Test this out sometime!
+			Else
+				prey.SetDontMove(True)
+			EndIf
 
-		utility.wait(0.35)
+			utility.wait(0.35)
 				
-
-			;SetAnimationMarkers(5.5, 5.5, 5.55)
 			Debug.SendAnimationEvent(pred, "DragonVore_Dragon")
 			Debug.SendAnimationEvent(prey, "DragonVore_Human")
 
@@ -471,14 +470,6 @@ Function PlayVoreAnimation_Actor()
 
 	pred.SetVehicle(None)
 	prey.SetVehicle(None)
-
-EndFunction
-
-
-Function SetAnimationMarkers(float preyXOffset, float preyYOffset, float preyZOffset)
-	{ Attempts to Sync up animations in a similar way to how SexLab does, by manually positioning actors with offsets dependant on animation desired. }
-
-	
 
 EndFunction
 
