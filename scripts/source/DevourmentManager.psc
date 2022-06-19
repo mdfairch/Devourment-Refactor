@@ -6795,6 +6795,8 @@ bool Function saveSettings(String settingsFileName)
 	JMap.setInt(data, "MalePreds", 			MalePreds as int)
 
 	JMap.SetObj(data, "CreaturePredatorToggles",	JArray.objectWithInts(CreaturePredatorToggles))
+	JMap.SetObj(data, "HumanoidMalePredatorToggles",	JArray.objectWithInts(HumanoidMalePredatorToggles))
+	JMap.SetObj(data, "HumanoidFemalePredatorToggles",	JArray.objectWithInts(HumanoidFemalePredatorToggles))
 	JMap.setInt(data, "PlayerAlias.DefaultLocus", PlayerAlias.DefaultLocus)
 	
 	SkullHandler.SaveSettings(data)
@@ -6866,6 +6868,8 @@ bool Function loadSettings(String settingsFileName)
 	malePreds = 			JMap.getInt(data, "malePreds", 				malePreds as int) as bool
 	
 	CreaturePredatorToggles =	JArray.asIntArray(JMap.getObj(data, "CreaturePredatorToggles", JArray.ObjectWithInts(CreaturePredatorToggles)))
+	HumanoidMalePredatorToggles =	JArray.asIntArray(JMap.getObj(data, "HumanoidMalePredatorToggles", JArray.ObjectWithInts(HumanoidMalePredatorToggles)))
+	HumanoidFemalePredatorToggles =	JArray.asIntArray(JMap.getObj(data, "HumanoidFemalePredatorToggles", JArray.ObjectWithInts(HumanoidFemalePredatorToggles)))
 	PlayerAlias.DefaultLocus = JMap.getInt(data, "DefaultLocus", PlayerAlias.DefaultLocus)
 	Menu.AltPerkMenus = 	JMap.getInt(data, "AltPerkMenus",			Menu.AltPerkMenus as int) as bool
 	Menu.RecalculateLocusCumulative()
