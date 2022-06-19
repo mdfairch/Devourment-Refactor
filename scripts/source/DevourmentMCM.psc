@@ -640,10 +640,54 @@ event OnPageReset(string page)
 		addTextOption("Others digested: ", Manager.GetVictimType(target, "other"))
 
 	ElseIf page == Pages[2]
-		AddToggleOptionST("FemalePredatorsState", "$DVT_FemPred", Manager.femalePreds)
-		AddToggleOptionST("MalePredatorsState", "$DVT_MalePred", Manager.malePreds)
+
+		addHeaderOption("Female Predator Toggles")
 		Int i = 0
-		Int iLength = Manager.PredatorWhitelist.Length
+		Int iLength = Manager.HumanoidPredatorRaces.Length
+		AddToggleOptionST("FemalePredatorsState", "$DVT_FemPred", Manager.femalePreds)
+		If Manager.femalePreds
+			while i < iLength
+				Int[] double = new Int[2]
+				double[0] = i + 900	;Position, plus offset.
+				String Name = Manager.HumanoidPredatorRaces[i].GetName()
+				if i == 11	;This is a frustrating workaround but it's better than space wasted with string array.
+					Name = "Snow Elf"
+				EndIf
+				double[1] = AddToggleOption(Name, Manager.HumanoidFemalePredatorToggles[i])	;OID
+				int oDouble = JArray.objectWithInts(double)
+				JIntMap.SetObj(optionsMap, double[1], oDouble)
+				i += 1 
+			endWhile
+		EndIf
+
+		AddEmptyOption()
+		addHeaderOption("Male Predator Toggles")
+
+		i = 0
+		AddToggleOptionST("MalePredatorsState", "$DVT_MalePred", Manager.malePreds)
+		If Manager.malePreds
+			while i < iLength
+				Int[] double = new Int[2]
+				double[0] = i + 600	;Position, plus offset.
+				String Name = Manager.HumanoidPredatorRaces[i].GetName()	;Since they share names maybe I could build both at once. TODO?
+				if i == 11	;This is a frustrating workaround but it's better than space wasted with string array.
+					Name = "Snow Elf"
+				EndIf
+				double[1] = AddToggleOption(Name, Manager.HumanoidMalePredatorToggles[i])	;OID
+				int oDouble = JArray.objectWithInts(double)
+				JIntMap.SetObj(optionsMap, double[1], oDouble)
+				i += 1 
+			endWhile
+		EndIf
+
+		AddEmptyOption()
+		addHeaderOption("Predator Whitelist")
+
+		iLength = Manager.PredatorWhitelist.Length
+
+		i = 1	;No need to give the player option to remove themselves.
+		AddTextOption(PlayerRef.GetLeveledActorBase().GetName(), "")
+		
 		while i < iLength
 			Int[] whitelistDouble = new Int[2]
 			whitelistDouble[0] = i + 300 ;Offset so we can differentiate this and creatures since same page.
@@ -654,8 +698,9 @@ event OnPageReset(string page)
 		endWhile
 
 		setCursorPosition(1)
-		AddToggleOptionST("CreaturePredatorsState", "$DVT_creaturePred", Manager.creaturePreds)
 
+		addHeaderOption("Creature Predator Toggles")
+		AddToggleOptionST("CreaturePredatorsState", "$DVT_creaturePred", Manager.creaturePreds)
 		If Manager.CreaturePreds ;&& rebuildCreatureMenu
 			i = 0
 			iLength = Manager.CreaturePredatorRaces.Length
@@ -676,7 +721,7 @@ event OnPageReset(string page)
 				i += 1
 			EndWhile
 		EndIf
-
+		
 	ElseIf page == Pages[4]
 
 		setCursorPosition(0)
@@ -814,7 +859,28 @@ Event OnOptionSelect(int a_option)
 		int[] double = JArray.asIntArray(od)
 		int index = double[0]
 
-		If index < 300
+		If index > 899
+			If a_option == double[1]
+				If Manager.HumanoidFemalePredatorToggles[index - 900] == 0
+					Manager.HumanoidFemalePredatorToggles[index - 900] = 1
+				Else
+					Manager.HumanoidFemalePredatorToggles[index - 900] = 0
+				EndIf
+				SetToggleOptionValue(double[1], Manager.HumanoidFemalePredatorToggles[index - 900] as Bool, false)
+			EndIf
+		elseif index > 599
+			If a_option == double[1]
+				If Manager.HumanoidMalePredatorToggles[index - 600] == 0
+					Manager.HumanoidMalePredatorToggles[index - 600] = 1
+				Else
+					Manager.HumanoidMalePredatorToggles[index - 600] = 0
+				EndIf
+				SetToggleOptionValue(double[1], Manager.HumanoidMalePredatorToggles[index - 600] as Bool, false)
+			EndIf
+		elseif index > 299
+			Manager.PredatorWhitelist = PapyrusUtil.RemoveActor(Manager.PredatorWhitelist, Manager.PredatorWhitelist[index - 300])
+			ForcePageReset()
+		else 
 			If a_option == double[1]
 				If Manager.CreaturePredatorToggles[index] == 0
 					Manager.CreaturePredatorToggles[index] = 1
@@ -823,10 +889,7 @@ Event OnOptionSelect(int a_option)
 				EndIf
 				SetToggleOptionValue(double[1], Manager.CreaturePredatorToggles[index] as Bool, false)
 			EndIf
-		Else
-			Manager.PredatorWhitelist = PapyrusUtil.RemoveActor(Manager.PredatorWhitelist, Manager.PredatorWhitelist[index - 300])
-			ForcePageReset()
-		EndIf
+		endIf
 	EndIf
 
 EndEvent
@@ -840,6 +903,7 @@ state MalePredatorsState
 	event OnSelectST()
 		Manager.malePreds = !Manager.malePreds
 		setToggleOptionValueST(Manager.malePreds)
+		ForcePageReset()
 	endEvent
 
 	event OnHighlightST()
@@ -857,6 +921,7 @@ state FemalePredatorsState
 	event OnSelectST()
 		Manager.femalePreds = !Manager.femalePreds
 		setToggleOptionValueST(Manager.femalePreds)
+		ForcePageReset()
 	endEvent
 
 	event OnHighlightST()

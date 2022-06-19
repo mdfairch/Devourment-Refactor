@@ -102,6 +102,8 @@ GlobalVariable[] property HealthMeterColours auto
 Idle Property IdleStop Auto
 Idle property IdleVore auto
 Int[] property CreaturePredatorToggles auto
+Int[] property HumanoidMalePredatorToggles auto
+Int[] property HumanoidFemalePredatorToggles auto
 Keyword property ActorTypeAnimal auto
 Keyword property ActorTypeCreature auto
 Keyword property ActorTypeDaedra auto
@@ -139,6 +141,7 @@ Outfit property DigestionOutfit auto
 PlayerVampireQuestScript property PlayerVampireQuest auto
 Race property Dragon auto
 Race[] property CreaturePredatorRaces auto
+Race[] property HumanoidPredatorRaces auto
 ReferenceAlias property PredNameAlias auto
 ReferenceAlias property PreyNameAlias auto
 ReferenceAlias property WhitelistNameAlias auto
@@ -171,15 +174,15 @@ int[] property EdibleTypes auto
 bool property AnalEscape = false auto
 bool property CombatAcceleration = false auto
 bool property SoftDeath = false auto
-bool property creaturePreds = true auto
+bool property creaturePreds = false auto
 bool property crouchScat = true auto
 bool property drawnAnimations = true auto
 bool property endoAnyone = false auto
-bool property femalePreds = true auto
+bool property femalePreds = false auto
 bool property killEssential = false auto
 bool property killNPCs = true auto
 bool property killPlayer = true auto
-bool property malePreds = true auto
+bool property malePreds = false auto
 bool property notifications = true auto
 bool property screamSounds = true auto
 bool property shitItems = false auto
@@ -4711,16 +4714,14 @@ bool Function validPredator(Actor target)
 	ElseIf PredatorWhitelist.find(target) >= 0
 		return true
     ElseIf target.hasKeyword(ActorTypeCreature) && creaturePreds
-		Log1(PREFIX, "validPredator()", "Got past creaturepreds: " + creaturePreds)
 		Race baseRace = Remapper.RemapRace(target.GetLeveledActorBase().getRace())
-		Log1(PREFIX, "validPredator()", "Got past baserace: " + baseRace)
-		int index = CreaturePredatorRaces.Find(target.GetRace())
-		Log1(PREFIX, "validPredator()", "Got past index: " + index)
-		Log1(PREFIX, "validPredator()", "Now deciding: " + CreaturePredatorToggles[index])
+		int index = CreaturePredatorRaces.Find(baseRace)
 		return index >= 0 && CreaturePredatorToggles[index]
-	elseIf target.HasKeyword(ActorTypeNPC)
+	elseIf target.HasKeyword(ActorTypeNPC) && (MalePreds || FemalePreds)
 		int sex = target.getLeveledActorBase().getSex()	;We only care for Sex where humanoids are concerned.
-		return (sex == 0 && MalePreds) || (sex != 0 && FemalePreds)
+		Race baseRace = Remapper.RemapRace(target.GetLeveledActorBase().getRace())
+		int index = HumanoidPredatorRaces.Find(baseRace)
+		return (sex == 0 && HumanoidMalePredatorToggles[index] && MalePreds) || (sex != 0 && HumanoidFemalePredatorToggles[index] && FemalePreds)
 	else
 		Return False
 	endIf
