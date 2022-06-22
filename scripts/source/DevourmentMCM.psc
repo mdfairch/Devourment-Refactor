@@ -725,7 +725,17 @@ event OnPageReset(string page)
 	ElseIf page == Pages[4]
 
 		setCursorPosition(0)
+		setCursorFillMode(LEFT_TO_RIGHT)
+		AddHeaderOption("Body Sliders vs Equipable Choice")
+		AddEmptyOption()
+		AddTextOptionST("ShowEquipableHelpState", "$DVT_EquipableBellyHelpButton", None)
 		addMenuOptionSt("equipBellyState", "$DVT_EquipableBelly", equipList[Morphs.EquippableBellyType])
+		AddEmptyOption()
+		AddEmptyOption()
+
+		setCursorFillMode(TOP_TO_BOTTOM)
+		setCursorPosition(4)
+		AddHeaderOption("Morphing Settings")
 		addToggleOptionSt("UseLocusMorphsState", "$DVT_LocusMorphs", Morphs.UseLocationalMorphs)
 		addSliderOptionSt("MorphSpeedState", "$DVT_MorphSpeed", Morphs.MorphSpeed, "{2}x")
 		addToggleOptionSt("EliminationLocusState", "$DVT_UseEliminationLocus", Morphs.UseEliminationLocus)
@@ -738,7 +748,7 @@ event OnPageReset(string page)
 		endIf
 		
 		if !Morphs.UseLocationalMorphs
-			setCursorPosition(1)
+			setCursorPosition(5)
 			addInputOptionSt("Slider_Locus0State", "$DVT_LocusSlider", Morphs.Locus_Sliders[0])
 			addSliderOptionSt("Scaling_Locus0State", "$DVT_LocusScale", Morphs.Locus_Scales[0], "{2}")
 			addEmptyOption()
@@ -763,7 +773,7 @@ event OnPageReset(string page)
 			addSliderOptionSt("Scaling_Locus2_MaxState", "$DVT_LocusMaximum", Morphs.Locus_Maxes[2], "{2}", OPTION_FLAG_DISABLED)
 			addSliderOptionSt("Chance_Locus2", "$DVT_LocusChance", LocusChances[2], "{2}")
 
-			setCursorPosition(1)
+			setCursorPosition(5)
 
 			addToggleOptionSt("DualBreastModeState", "$DVT_UseDualBreastMode", Morphs.UseDualBreastMode)
 
@@ -893,6 +903,12 @@ Event OnOptionSelect(int a_option)
 	EndIf
 
 EndEvent
+
+state ShowEquipableHelpState
+	event OnSelectST()
+    	ShowMessage("You can choose between using Sliders, or the Refactored / Classic equipable belly. Equipable bellies are compatible with almost all outfits and are an actual armor piece equipped onto predators, but look a bit worse than Sliders. Using Sliders requires you have any outfits you intend to wear converted over to a Devourment body in Bodyslide. Note that on AE, equipables are sometimes unreliable.")
+    endEvent
+endState
 
 state MalePredatorsState
 	event OnDefaultST()
@@ -1652,9 +1668,9 @@ state equipBellyState
 
 	event OnHighlightST()
 		if Morphs.EquippableBellyType == 1
-			SetInfoText("Equip the Macross morphvore belly with struggle sliders.\nCopies the body skin texture and generally looks excellent with any CBBE or 3BA body.")
+			SetInfoText("Equip the Refactored equipable belly with struggle sliders.\nCopies the body skin texture and generally looks excellent with any CBBE or 3BA body.")
 		elseif Morphs.EquippableBellyType == 2
-			SetInfoText("Equip the SkepticMech morphvore belly with struggle sliders.\nUses Xomod texturing and is relatively compatible with CBBE, 3BA, UNP, UUNP, and BHUNP.")
+			SetInfoText("Equip the Classic equipable belly with struggle sliders.\nUses Xomod texturing and is relatively compatible with CBBE, 3BA, UNP, UUNP, and BHUNP.")
 		else
 			SetInfoText("Don't use any equipable belly.")
 		endIf
