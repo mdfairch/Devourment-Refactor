@@ -15,6 +15,7 @@ float property CreatureScaling = 2.0 auto
 float[] property Locus_Scales auto
 float[] property Locus_Maxes auto
 String[] property Locus_Sliders auto
+String[] property StruggleSliders auto
 
 
 Event OnInit()

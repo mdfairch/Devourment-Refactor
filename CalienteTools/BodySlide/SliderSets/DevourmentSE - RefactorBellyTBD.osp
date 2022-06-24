@@ -6,8 +6,8 @@
         <OutputPath>meshes\actors\character\character assets\strugglebelly</OutputPath>
         <OutputFile GenWeights="true">female_belly</OutputFile>
         <Shape target="equip_belly" DataFolder="DevourmentSE - Female">equip_belly</Shape>
-        <Slider name="Vore prey belly" invert="false" small="0" big="0">
-            <Data name="equip_bellyVore prey belly" target="equip_belly" local="true">DevourmentSE - RefactorBellyTBD.osd\equip_bellyVore prey belly</Data>
+        <Slider name="Equipable Vore prey belly" invert="false" small="0" big="0">
+            <Data name="equip_bellyEquipable Vore prey belly" target="equip_belly" local="true">DevourmentSE - RefactorBellyTBD.osd\equip_bellyEquipable Vore prey belly</Data>
         </Slider>
         <Slider name="Body_Muscular" invert="false" small="0" big="0">
             <Data name="equip_bellyBody_Muscular" target="equip_belly" local="true">DevourmentSE - RefactorBellyTBD.osd\equip_bellyBody_Muscular</Data>
@@ -174,14 +174,14 @@
         <Slider name="SSBBW WGBelly" invert="false" small="0" big="0">
             <Data name="equip_bellySSBBW WGBelly" target="equip_belly" local="true">DevourmentSE - RefactorBellyTBD.osd\equip_bellySSBBW WGBelly</Data>
         </Slider>
-        <Slider name="StruggleSlider1" invert="false" small="0" big="0">
-            <Data name="equip_bellyStruggleSlider1" target="equip_belly" local="true">DevourmentSE - RefactorBellyTBD.osd\equip_bellyStruggleSlider1</Data>
+        <Slider name="Equipable StruggleSlider1" invert="false" small="0" big="0">
+            <Data name="equip_bellyEquipable StruggleSlider1" target="equip_belly" local="true">DevourmentSE - RefactorBellyTBD.osd\equip_bellyEquipable StruggleSlider1</Data>
         </Slider>
-        <Slider name="StruggleSlider2" invert="false" small="0" big="0">
-            <Data name="equip_bellyStruggleSlider2" target="equip_belly" local="true">DevourmentSE - RefactorBellyTBD.osd\equip_bellyStruggleSlider2</Data>
+        <Slider name="Equipable StruggleSlider2" invert="false" small="0" big="0">
+            <Data name="equip_bellyEquipable StruggleSlider2" target="equip_belly" local="true">DevourmentSE - RefactorBellyTBD.osd\equip_bellyEquipable StruggleSlider2</Data>
         </Slider>
-        <Slider name="StruggleSlider3" invert="false" small="0" big="0">
-            <Data name="equip_bellyStruggleSlider3" target="equip_belly" local="true">DevourmentSE - RefactorBellyTBD.osd\equip_bellyStruggleSlider3</Data>
+        <Slider name="Equipable StruggleSlider3" invert="false" small="0" big="0">
+            <Data name="equip_bellyEquipable StruggleSlider3" target="equip_belly" local="true">DevourmentSE - RefactorBellyTBD.osd\equip_bellyEquipable StruggleSlider3</Data>
         </Slider>
     </SliderSet>
 </SliderSetInfo>
