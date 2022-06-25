@@ -278,13 +278,13 @@ int property MULTI_UNLIMITED = 4 autoreadonly
 ; Animation flags
 bool property FNISDetected
 	bool Function get()
-		if _FNISDetected < 0
-			_FNISDetected = Game.GetPlayer().GetAnimationVariableInt("DevourmentAnimationVersion")
+		if _FNISDetected == false
+			_FNISDetected = FNIS.IsGenerated()
 		endIF
-		return _FNISDetected > 0
+		return _FNISDetected
 	endFunction
 endproperty 
-int _FNISDetected = -1
+bool _FNISDetected = false
 
 bool FrostFallInstalled = false
 
