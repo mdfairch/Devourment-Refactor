@@ -57,7 +57,6 @@
     </Group>
     <Group name="Devourment Equipables">
         <Member name="DevourmentSE - ClassicStruggleBelly"/>
-        <Member name="DevourmentSE - ClassicStruggleBelly-Aux"/>
         <Member name="DevourmentSE - RefactorBellyF"/>
         <Member name="DevourmentSE - RefactorBellyM"/>
         <Member name="DevourmentSE - RefactorBellyTBD"/>
