@@ -1324,9 +1324,6 @@ function FinishLiveDigestion(Actor pred, Actor prey, int preyData)
 	playBurp_async(pred)
 	UpdateSounds_async(pred)
 
-	; Do the skull stuff!
-	AddSkull_Async(pred, prey)
-
 	; Equipment stripping.
 	bool isNPC = prey.HasKeyword(ActorTypeNPC)
 	if (isNPC && ScatTypeNPC == 0 && ScatTypeBolus > 0) || (!isNPC && ScatTypeCreature == 0 && ScatTypeBolus > 0)
@@ -1614,15 +1611,18 @@ Event DeadDigested(Form f1, Form f2, int preyData)
 
 		if (isNPC && scatTypeNPC == 0) || (!isNPC && scatTypeCreature == 0)
 			AbsorbRemains(pred, prey, preyData)
+			AddSkull_Async(pred, prey)
 			SendDeadDigestionEvent(pred, prey, 0.0)
 		elseif (isNPC && (scatTypeNPC == 1 || scatTypeNPC == 2)) || (!isNPC && scatTypeCreature == 1) 
 			if !pred.IsInCombat() && (notInPlayerHome(pred) || pred.isDead())
 				ExpelRemains(pred, prey, preyData)
+				AddSkull_Async(pred, prey)
 				SendDeadDigestionEvent(pred, prey, 0.0)
 			endIf
 		elseif (isNPC && scatTypeNPC == 3) || (!isNPC && scatTypeNPC == 2)
 			if pred != PlayerRef && (notInPlayerHome(pred) || pred.isDead())
 				RegisterVomit(prey)
+				AddSkull_Async(pred, prey)
 				SendDeadDigestionEvent(pred, prey, 0.0)
 			endIf
 		endIf
@@ -1931,7 +1931,7 @@ function ExpelRemains(Actor pred, ObjectReference content, int preyData)
 	; called -- which will either kill the player or make the player the pred.
 	if apex == playerRef && !(crouchScat && apex.isSneaking() && !apex.IsWeaponDrawn())
 		return
-	elseif !RegisterBlock("ExpelRemains", pred)
+	elseif apex != pred || !RegisterBlock("ExpelRemains", pred)
 		return
 	endIf
 	
@@ -2270,12 +2270,9 @@ Removes a single dead content from the pred and places a scat pile or bones behi
 		Container feces = GetFecesType(prey)
 		ObjectReference pile = apex.placeAtMe(feces, 1, true, false)
 		
-		; Only scale generic feces.
-		if feces == RemainsFeces[7] 
-			pile.setScale(Math.sqrt(GetVoreWeight(prey) / 100.0))
-		endIf
+		pile.setScale(Math.sqrt(GetVoreWeight(prey) / 100.0))
+		pile.setAngle(0.0, 0.0, Utility.RandomFloat(0.0,360.0))
 
-		pile.setAngle(0.0, 0.0, 0.0)
 		
 		if prey != playerRef
 			prey.removeAllItems(pile, false, true)
@@ -3367,7 +3364,7 @@ run in parallel to the main loop.
 		elseif hp
 			Notify(predName + " gained " + gain as int + " points of health from " + preyName)
 		elseif sp
-			Notify(predName + " gained " + gain as int + " points of staminafrom " + preyName)
+			Notify(predName + " gained " + gain as int + " points of stamina from " + preyName)
 		elseif mp
 			Notify(predName + " gained " + gain as int + " points of magicka from " + preyName)
 		endIf
