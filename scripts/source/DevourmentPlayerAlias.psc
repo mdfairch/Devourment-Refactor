@@ -254,7 +254,7 @@ EndFunction
 
 Function StartPlayerStruggle()
 	if !PlayerRef.HasSpell(PlayerStruggleSpell)
-		PlayerRef.AddSpell(PlayerStruggleSpell)
+		PlayerRef.AddSpell(PlayerStruggleSpell, false)
 	endIf
 EndFunction
 

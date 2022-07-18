@@ -56,12 +56,8 @@ Event onEffectFinish(Actor akTarget, Actor akCaster)
 		prey.unequipShout(DummyShout)
 		prey.removeSpell(DummySpell)
 		prey.removeShout(DummyShout)
-		if storedSpell
-			prey.equipSpell(storedSpell, 2)
-		endIf
-		if storedShout
-			prey.equipShout(storedShout)
-		endIf
+		prey.equipSpell(storedSpell, 2)
+		prey.equipShout(storedShout)
 	endIf
 	
 

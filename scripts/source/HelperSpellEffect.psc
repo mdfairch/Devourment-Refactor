@@ -34,11 +34,11 @@ Function castNow()
 	endIf
 	
 	if TargetSpellToAdd != none
-		target.addSpell(TargetSpellToAdd)
+		target.addSpell(TargetSpellToAdd, false)
 	endif
 	
 	if CasterSpellToAdd != none
-		caster.addSpell(CasterSpellToAdd)
+		caster.addSpell(CasterSpellToAdd, false)
 	endif
 	
 	if DispelMe
