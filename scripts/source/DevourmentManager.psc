@@ -1870,7 +1870,7 @@ function AbsorbRemains(Actor pred, ObjectReference content, int preyData)
 	elseif !RegisterBlock("AbsorbRemains", pred)
 		return
 	endIf
-	
+
 	Actor apex = FindApex(content)
 	bool local = apex == playerRef || content == playerRef || apex.is3DLoaded()
 	bool apexIsDead = apex.isDead()
@@ -2658,6 +2658,7 @@ int Function TransferWornForm(Actor owner, ObjectReference bolus, int slot)
 	endIf
 EndFunction
 
+
 bool Function DigestItem(Actor pred, Form item, int count, Actor owner, bool unrestricted = true, int locus = -1)
 { 
 Creates a bolus for the specified item, with an optional owner, and registers it as swallowed. 
@@ -2687,7 +2688,7 @@ The unrestricted skips the "IsStrippable" check.
 	; If the item is a DevourmentSkull, try to revive it.
 	if item as DevourmentSkullObject
 		DevourmentSkullObject skull = item as DevourmentSkullObject
-		
+
 		if !skull.IsInitialized() || !skull.IsEnabled()
 			Log1(PREFIX, "DigestItem", "Uninitialized DevourmentSkull; skipping reformation.")
 
