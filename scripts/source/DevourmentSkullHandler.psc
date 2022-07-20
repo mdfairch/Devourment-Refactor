@@ -109,7 +109,7 @@ Function AddSkull(Actor pred, Actor prey)
 	int raceIndex = Races.find(remappedRace)
 	if raceIndex < 0 || raceIndex >= Skulls.length
 		if prey.HasKeyword(Manager.ActorTypeNPC)
-			raceIndex = Races.find(Game.GetForm(13746) as Race)	;Nord Race. This failover was set up this way so as to not damage existing savegames in the event our array indexes are moved.
+			raceIndex = Races.find(Game.GetForm(0x13746) as Race)	;Nord Race. This failover was set up this way so as to not damage existing savegames in the event our array indexes are moved.
 		else
 			Log3(PREFIX, "AddSkull", "Couldn't find matching skull.", Namer(prey), Namer(remappedRace))
 			return
@@ -149,6 +149,7 @@ bool Function SwallowSkull(Actor pred, DevourmentSkullObject skullRef, int locus
 		return false
 	endIf
 	
+	;/
 	; For the player, get a suitable proxy.
 	if revivee == PlayerRef
 		Actor deadDovaRef = DevourmentNewDova.instance().deadDovaRef
@@ -158,6 +159,7 @@ bool Function SwallowSkull(Actor pred, DevourmentSkullObject skullRef, int locus
 			return false
 		endIf
 	endIf
+	/;
 
 	Log0(PREFIX, "SwallowSkull")
 	

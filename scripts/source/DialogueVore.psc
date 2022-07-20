@@ -131,6 +131,7 @@ EndFunction
 
 
 Function SwitchToEndo(Actor prey)
+	if !(Prey.IsDead())
 	DevourmentManager manager = DevourmentManager.instance()
 
 	if consented
@@ -142,12 +143,14 @@ Function SwitchToEndo(Actor prey)
 	endIf
 
 	manager.switchLethal(prey, false)
+	endIf
 EndFunction
 
 
 Function SwitchToVore(ObjectReference prey)
-	DevourmentManager manager = DevourmentManager.instance()
 
+	DevourmentManager manager = DevourmentManager.instance()
+	if !((Prey as Actor).IsDead())
 	if consented
 		manager.VoreConsent(prey)
 	endIf
@@ -157,12 +160,13 @@ Function SwitchToVore(ObjectReference prey)
 	endIf
 
 	manager.switchLethal(prey, true)
+	endIf
 EndFunction
 
 
 Function LethalDisable(Actor pred, Actor prey)
 	DevourmentManager manager = DevourmentManager.instance()
-
+	if !(Prey.IsDead())
 	if applyToPred
 		if intimidate
 			Intimidate(pred)
@@ -205,6 +209,7 @@ Function LethalDisable(Actor pred, Actor prey)
 				manager.SwitchLethal(stomach[preyIndex] as Actor, true)
 			endIf
 		endWhile
+	endIf
 	endIf
 EndFunction
 

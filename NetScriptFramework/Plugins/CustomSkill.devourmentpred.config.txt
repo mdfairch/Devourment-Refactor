@@ -3,7 +3,7 @@ Name = "Predator"
 
 # Description of skill will appear in custom perks menu under the name and level, set "" to clear it
 # if you don't want to show anything
-Description = ""
+Description = "Vore Skills for Predators"
 
 # Custom background nif, INTVampirePerkSkydome.nif is showing the werewolf background, if you use custom
 # nif you made it must have some nodes and images, recommended is to edit this nif instead of creating
@@ -60,7 +60,7 @@ DebugReloadId = 0xCC2
 # Node0 is the root node, this should not have coordinates or a perk assigned to it. This must exist even if you don't want to have any perks.
 # Use Node0.Links to point to first perk(s). If you don't want any perks then remove the links line or set to ""
 Node0.Enable = true
-Node0.Links = "1 12 13"
+Node0.Links = "1, 12, 13"
 
 # Actual perks begin from here. When you are making a condition on perk for specific level of skill required instead of GetBaseActorValue use GetGlobalValue
 # for the global variable you set in the "Level" option. This will generate correct requirement description in-game.
@@ -78,7 +78,6 @@ Node12.X = 0
 Node12.Y = 0
 Node12.GridX = 1
 Node12.GridY = 0
-Node12.Links = ""
 
 # Voracious
 Node1.Enable = true
@@ -88,7 +87,7 @@ Node1.X = 0
 Node1.Y = 0
 Node1.GridX = 2
 Node1.GridY = 0
-Node1.Links = "2 3 4 5 11"
+Node1.Links = "2, 3, 4, 5, 11"
 
 # Gasses
 Node13.Enable = true
@@ -98,7 +97,6 @@ Node13.X = 0
 Node13.Y = 0
 Node13.GridX = 3
 Node13.GridY = 0
-Node13.Links = ""
 
 ########### ROW 1 ###########
 
@@ -131,7 +129,6 @@ Node11.X = 0
 Node11.Y = 0
 Node11.GridX = 2
 Node11.GridY = 1
-Node11.Links = ""
 
 
 # Strong Acid
@@ -164,7 +161,6 @@ Node6.X = 0
 Node6.Y = 0
 Node6.GridX = 0
 Node6.GridY = 2
-Node6.Links = ""
 
 # Digestion
 Node7.Enable = true
@@ -184,7 +180,6 @@ Node8.X = 0
 Node8.Y = 0
 Node8.GridX = 4
 Node8.GridY = 2
-Node8.Links = ""
 
 # Soul Food
 Node9.Enable = true
@@ -208,4 +203,3 @@ Node10.X = 0
 Node10.Y = 0
 Node10.GridX = 2
 Node10.GridY = 3
-Node10.Links = ""

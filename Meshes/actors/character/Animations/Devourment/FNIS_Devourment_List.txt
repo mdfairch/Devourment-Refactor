@@ -1,5 +1,5 @@
-Version V5
-AnimVar DevourmentAnimationVersion INT32 105
+Version V6
+AnimVar DevourmentAnimationVersion INT32 106
 
 ' Format:
 '			<type> [-<option,option,...>] <AnimEvent> <AnimFile> [<AnimObject> ...]		(FNIS Animation)
@@ -55,6 +55,9 @@ AnimVar DevourmentAnimationVersion INT32 105
 
 b -a DevourA01 DevourA01.hkx
 b -a DevourA02 DevourA02.hkx
+
+b -a DragonVore_Human DevourmentDragon_Human.hkx
+b -a MammothVore_Human DevourmentMammoth_Human.hkx
 
 s -a,k LayDownBirth Animations\IdleLaydown_Enter.hkx
 + -B1.4 Birth_S1 Birth_S1.hkx

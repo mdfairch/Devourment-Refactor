@@ -7,7 +7,7 @@ bool property UseDualBreastMode = true auto
 bool property UseMorphVore = true auto
 bool property UseStruggleSliders = true auto
 bool property UseLocationalMorphs = true auto
-bool property UseEliminationLocus = true auto
+bool property UseEliminationLocus = false auto
 int property EquippableBellyType = 1 auto
 float property StruggleAmplitude = 1.0 auto
 float property MorphSpeed = 0.07 auto
@@ -15,6 +15,7 @@ float property CreatureScaling = 2.0 auto
 float[] property Locus_Scales auto
 float[] property Locus_Maxes auto
 String[] property Locus_Sliders auto
+String[] property StruggleSliders auto
 
 
 Event OnInit()

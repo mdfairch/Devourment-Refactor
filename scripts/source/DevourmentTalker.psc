@@ -4,6 +4,7 @@ import Logging
 
 DevourmentManager property Manager auto
 Actor property PlayerRef auto
+Actor property target auto
 ObjectReference property HerStomach auto
 
 
@@ -16,9 +17,10 @@ Function ClearPrompt()
 EndFunction
 
 
-Function PrepareForDialog(Actor target)
-	if target
-		self.SetDisplayName(Namer(target, true))
+Function PrepareForDialog(Actor ktarget)
+	if ktarget
+		target = ktarget
+		self.SetDisplayName(Namer(ktarget, true))
 	else
 		self.setDisplayName("")
 	endIf

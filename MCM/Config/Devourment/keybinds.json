@@ -77,6 +77,17 @@
 				"function": "HotkeyVore",
 				"params": [2]
 			}
+		},
+		{
+			"id": "WhitelistHotkey",
+			"desc": "Devourment whitelist hotkey",
+			"action": {
+				"type": "CallFunction",
+				"form": "Devourment.esp|96A",
+				"scriptName": "DevourmentManager",
+				"function": "WhitelistPredator",
+				"params": []
+			}
 		}
 	]
 }

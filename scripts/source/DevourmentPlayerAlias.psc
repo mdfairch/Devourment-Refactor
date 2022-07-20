@@ -7,7 +7,6 @@ import DevourmentUtil
 DevourmentManager property Manager auto
 DevourmentMCM property DevourMCM auto
 DevourmentDialog property DialogQuest auto
-DevourmentWeightManager property WeightManager auto
 Actor Property PlayerRef auto
 Faction property Follower auto
 Furniture property BedRoll auto
@@ -55,11 +54,6 @@ Event OnInit()
 	Manager.LoadGameChecks()
 	RegisterForKey(SHOUT_KEY)
 	self.LoadGameChecks()
-EndEvent
-
-
-Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
-	WeightManager.OnObjectEquipped(akBaseObject, akReference)
 EndEvent
 
 
@@ -125,11 +119,6 @@ Event OnPlayerLoadGame()
 	Manager.LoadGameChecks()
 	self.LoadGameChecks()
 	Utility.wait(3.0)
-EndEvent
-
-
-Event OnRaceSwitchComplete()
-	DevourmentNewDova.instance().ClearPlayerName()
 EndEvent
 
 
@@ -265,7 +254,7 @@ EndFunction
 
 Function StartPlayerStruggle()
 	if !PlayerRef.HasSpell(PlayerStruggleSpell)
-		PlayerRef.AddSpell(PlayerStruggleSpell)
+		PlayerRef.AddSpell(PlayerStruggleSpell, false)
 	endIf
 EndFunction
 
@@ -1006,8 +995,6 @@ This does most of the work of doing all the things that need to happen when the 
 * It makes sure that it is registered for events of interest like sleep and wait.
 * It makes sure that the player has devourment abilities if they should.
 }
-	DevourmentNewDova.instance().SetPlayerName()
-
 	if Manager.IsPrey(playerRef)
 		Manager.deactivatePrey(playerRef)
 
@@ -1229,51 +1216,53 @@ EndFunction
 
 Function CheckDependencies()
 
-	bool SSE = SKSE.GetPluginVersion("JContainers64") > 0 || SKSE.GetPluginVersion("skee") || SKSE.GetPluginVersion("ConsoleUtilSSE") > 0
-	bool SLE = SKSE.GetPluginVersion("JContainers") > 0 || SKSE.GetPluginVersion("NIOverride") > 0 || SKSE.GetPluginVersion("console plugin") > 0
-	
-	if SSE && !CheckSKSE("EngineFixes plugin", "EngineFixes plugin", 5)
-		Debug.TraceAndBox("EngineFixes is not installed!")
-	
-	elseif JContainers.FeatureVersion() < 1 || JContainers.APIVersion() < 4 || !CheckSKSE("JContainers64", "JContainers", 4)
-		Debug.TraceAndBox("JContainers is not installed!")
-	
-	elseif PapyrusUtil.GetVersion() < 39 || PapyrusUtil.GetScriptVersion() < 39 || !CheckSKSE("papyrusutil", "papyrusutil plugin", 2)
-		Debug.TraceAndBox("PapyrusUtil is not installed!")
-	
-	elseif ConsoleUtil.GetVersion() < 4 || !CheckSKSE("ConsoleUtilSSE", "console plugin", 1)
-		Debug.TraceAndBox("ConsoleUtil is not installed!")
-	
-	elseif NIOverride.GetScriptVersion() < 7 || !CheckSKSE("skee", "NIOverride", 1)
-		Debug.TraceAndBox("NIOverride is not installed!")
-
-	elseif RaceMenuBase.GetScriptVersionRelease() < 7
-		Debug.TraceAndBox("RaceMenu is not installed!")
-	
-	elseif !CheckSKSE("powerofthree's Papyrus Extender", "PapyrusExtender", 4)
-		Debug.TraceAndBox("PowerOfThree's papyrus extender is not installed!")
-
-	elseif XPMSELib.GetXPMSELibVersion() < 4.2
-		Debug.TraceAndBox("XPMSE 4.2 or later is required! ")
-	
-	elseif !CheckSKSE("powerofthree's Spell Perk Distributor", "powerofthree's Spell Perk Distributor", 1)
-		Debug.TraceAndBox("Spell Perk Item Distributor is not installed!")
-
-	elseif SSE && !JContainers.fileExistsAtPath("data\\NetScriptFramework\\Plugins\\CustomSkills.dll")
-		Debug.TraceAndBox("Custom Skills Framework is not installed. Without it, you wont be able to access the perk trees.")
-		
-	elseif SSE && Game.GetModByName("Unofficial Skyrim Special Edition Patch.esp") == 255
-		Debug.TraceAndBox("The Unofficial Skyrim Special Edition patch is not installed!")
-
-	elseif SLE && Game.GetModByName("Unofficial Skyrim Legendary Edition Patch.esp") == 255
-		Debug.TraceAndBox("The Unofficial Skyrim Legendary Edition patch is not installed!")
-	
+	String ErrorReport = "Devourment Refactor: You are missing the following dependencies: "
+	Bool Display = False
+	;if !CheckSKSE("EngineFixes", 1) ;this one
+	;	Debug.TraceAndBox("EngineFixes is not installed!")
+	;endIf
+	if JContainers.FeatureVersion() < 1 || JContainers.APIVersion() < 4 ;|| !CheckSKSE("JContainers64", 4)
+		ErrorReport  = ErrorReport + " JContainers"
+		Display = True
 	endIf
+	if PapyrusUtil.GetVersion() < 39 || PapyrusUtil.GetScriptVersion() < 39 ;|| !CheckSKSE("papyrusutil", 2)
+		ErrorReport  = ErrorReport + " PapyrusUtil"
+		Display = True
+	endIf
+	if ConsoleUtil.GetVersion() < 4 ;|| !CheckSKSE("ConsoleUtilSSE", 1)
+		ErrorReport  = ErrorReport + " ConsoleUtil"
+		Display = True
+	endIf
+	if NIOverride.GetScriptVersion() < 7 ;|| !CheckSKSE("skee", 1)
+		ErrorReport  = ErrorReport + " NIOverride"
+		Display = True
+	endIf
+	if RaceMenuBase.GetScriptVersionRelease() < 7
+		ErrorReport = ErrorReport + " RaceMenu"
+		Display = True
+	endIf
+	if !CheckSKSE("powerofthree's Papyrus Extender", 4)
+		ErrorReport  = ErrorReport + " po3 Papyrus Extender"
+		Display = True
+	endIf
+	if XPMSELib.GetXPMSELibVersion() < 4.2
+		ErrorReport  = ErrorReport + " XPMSE"
+		Display = True
+	endIf
+	;if !CheckSKSE("powerofthree's Spell Perk Distributor", 1)
+	;	Debug.TraceAndBox("Spell Perk Item Distributor is not installed!")
+	;endIf
+	;if !JContainers.fileExistsAtPath("data\\NetScriptFramework\\Plugins\\CustomSkills.dll")
+	;	Debug.TraceAndBox("Custom Skills Framework is not installed. Without it, you wont be able to access the perk trees.")
+	;endIf
+	If Display
+		Debug.TraceAndBox(ErrorReport)
+	EndIf
 EndFunction
 
 
-bool Function CheckSKSE(String pluginSE, String pluginLE, int version)
-	return SKSE.GetPluginVersion(pluginSE) >= version || SKSE.GetPluginVersion(pluginLE) >= version
+bool Function CheckSKSE(String pluginSE, int version)	;This appears to have broken in the AE release. Do not use for now.
+	return SKSE.GetPluginVersion(pluginSE) >= version
 endFunction
 
 

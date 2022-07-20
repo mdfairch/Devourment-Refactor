@@ -26,7 +26,6 @@ DevourmentPlayerAlias Property PlayerAlias Auto
 DevourmentManager Property Manager Auto
 DevourmentMorphs Property Morphs Auto
 DevourmentSkullHandler Property SkullHandler Auto
-DevourmentWeightManager Property WeightManager Auto
 GlobalVariable Property VoreDialog Auto
 float[] property LocusChances auto
 float[] property LocusCumulative auto
@@ -67,7 +66,7 @@ Spell Property Power_EatThis auto
 
 
 ; Script-defined Properties.
-int property VERSION = 120 auto Hidden
+int property VERSION = 200 auto Hidden
 bool property EnableHungryBones = true auto Hidden
 bool property EnableCordyceps = true auto Hidden 
 bool property LooseItemVore = true auto Hidden
@@ -79,7 +78,6 @@ bool property UnrestrictedItemVore = false auto Hidden
 bool property GentleGas = false auto Hidden
 bool property CounterVoreEnabled = true auto Hidden
 bool property DigestToInventory = false auto Hidden
-bool property FoundBugFixesSSE = false auto
 String property ExportFilename = "data\\skse\\plugins\\devourment\\db_export.json" autoreadonly Hidden
 String property SettingsFileName = "data\\skse\\plugins\\devourment\\settings.json" autoreadonly Hidden
 String property PredPerkFile = "data\\skse\\plugins\\devourment\\PredPerkData.json" autoreadonly Hidden
@@ -93,7 +91,6 @@ String Property targetName Auto Hidden
 string[] equipList
 
 bool resetBellies = false
-bool resetWeights = false
 bool vomitActivated = false
 bool flushActivated = false
 
@@ -108,44 +105,40 @@ int optionsMap
 
 
 int function GetVersion()
-	return 120
+	return 200
 endFunction
 
 
 event OnConfigInit()
-	Pages = new string[10]
+	Pages = new string[7]
 	Pages[0] = "$DVT_Page_StatsSkills"
 	Pages[1] = "$DVT_Page_General"
-	Pages[2] = "$DVT_Page_VisualSoundMisc"
-	Pages[3] = "$DVT_Page_LocusMorphs"
-	Pages[4] = "$DVT_Page_WeightSettings"
-	Pages[5] = "$DVT_Page_WeightManagerFemale"
-	Pages[6] = "$DVT_Page_WeightManagerMale"
-	;Pages[?] = "$DVT_Page_WeightManagerCreature"	;TODO. When you enable this, make sure the page is in MCM Config.JSON also.
-	Pages[7] = "$DVT_Page_Debugging"
-	Pages[8] = "$DVT_Page_Dependancies"
+	Pages[2] = "$DVT_Page_WhoCanPred"
+	Pages[3] = "$DVT_Page_VisualSoundMisc"
+	Pages[4] = "$DVT_Page_LocusMorphs"
+	Pages[5] = "$DVT_Page_Debugging"
+	Pages[6] = "$DVT_Page_Dependancies"
 
 	equipList = new string[3]
 	equipList[0] = "$DVT_EquipNone"
-	equipList[1] = "$DVT_EquipMacross"
-	equipList[2] = "$DVT_EquipSkeptic"
+	equipList[1] = "$DVT_EquipMacross"	;"Macross is the one I made"
+	equipList[2] = "$DVT_EquipSkeptic" ;"Skepticmech is the old Gat one"
 endEvent
 
 
-;Event OnVersionUpdate(int newVersion)
-;	Upgrade(CurrentVersion, newVersion)
-;EndEvent
+Event OnVersionUpdate(int newVersion)
+	Upgrade(CurrentVersion, newVersion)
+EndEvent
 
 
 Function Upgrade(int oldVersion, int newVersion)
-{ Version 118 is a clean break, so upgrades all start from there. }
+{ Version 200 is a clean break, so upgrades all start from there. }
 	if oldVersion < newVersion
 		VERSION = newVersion
 		PlayerAlias.Upgrade(oldVersion, newVersion)
 		Manager.Upgrade(oldVersion, newVersion)
 		DevourmentSkullHandler.instance().Upgrade(oldVersion, newVersion)
 		DevourmentReformationQuest.instance().Upgrade(oldVersion, newVersion)
-		DevourmentNewDova.instance().Upgrade(oldVersion, newVersion)
 		RecalculateLocusCumulative()
 	endif
 endFunction
@@ -534,7 +527,6 @@ event onConfigOpen()
 	vomitActivated = false
 	flushActivated = false
 	resetBellies = false
-	resetWeights = false
 endEvent
 
 
@@ -547,11 +539,6 @@ event OnConfigClose()
 	if resetBellies
 		resetBellies = false
 		Manager.ResetBellies()
-	endIf
-
-	if resetWeights
-		resetWeights = false
-		WeightManager.ResetActorWeights()
 	endIf
 
 	If PerkMenuQueue == 1
@@ -568,15 +555,6 @@ event OnConfigClose()
 		endIf
 	EndIf
 	PerkMenuQueue = 0
-
-	If WeightManager.DoPreview != 0.0
-		If !WeightManager.PlayerEnabled
-			Debug.MessageBox("Devourment WeightManager Preview was called but you didn't enable Player weight morphs. Please enable this in the MCM.")
-		Else
-			WeightManager.ChangeActorWeight(PlayerRef, 0.0, source="Preview", preview=WeightManager.DoPreview)
-		EndIf
-	EndIf
-	WeightManager.DoPreview = 0.0
 
 endEvent
 
@@ -625,18 +603,12 @@ event OnPageReset(string page)
 		preySkillInfo = addTextOption("Devourment prey skill: ", preySkill)
 		addTextOption("Devourment level: ", Manager.GetVoreLevel(target))
 		addTextOption("Devourment perk points: ", perkPoints)
-		addToggleOptionSt("PredPerksState", "$DVT_ShowPredPerks", false)
-		addToggleOptionSt("PreyPerksState", "$DVT_ShowPreyPerks", false)
+		;Disabled for now, as Minimalistic Custom Skills Menu for AE cannot make use of them.
+		;addToggleOptionSt("PredPerksState", "$DVT_ShowPredPerks", false)
+		;addToggleOptionSt("PreyPerksState", "$DVT_ShowPreyPerks", false)
 		
-		if Manager.MicroMode
-			addTextOptionSt("CapacityInfoState",  "Devourment Capacity:   ", Manager.GetCapacity(target))
-		endIf
-		
-		if WeightManager.PlayerEnabled
-			addTextOption("Devourment Weight: ", WeightManager.GetWeightApprox(target))
-		endIf
+		addTextOptionSt("CapacityInfoState",  "Devourment Capacity:   ", Manager.GetCapacity(target))
 
-		addEmptyOption()
 		addTextOption("Swallow skill: ", swallowSkill)
 		addTextOption("Swallow resistance: ", swallowResistance)
 		addTextOption("Acid damage: ", acidDamage + " hp/sec")
@@ -655,12 +627,6 @@ event OnPageReset(string page)
 		addTextOption("Men", Manager.GetVictimType(target, "men"))
 		addTextOption("Corpses", Manager.GetVictimType(target, "corpses"))
 
-		DevourmentNewDova newDova = DevourmentNewDova.instance()
-		if NewDova.prevDov > 0
-			addTextOption("Previous Dovahkiins: ", NewDova.prevDov)
-			addTextOption("Last Dovahkiin", NewDova.previousName)
-		endif
-
 		addEmptyOption()
 		addTextOption("RACE ", " DIGESTED")
 		
@@ -673,10 +639,103 @@ event OnPageReset(string page)
 
 		addTextOption("Others digested: ", Manager.GetVictimType(target, "other"))
 
-	ElseIf page == Pages[3]
+	ElseIf page == Pages[2]
+
+		addHeaderOption("Female Predator Toggles")
+		Int i = 0
+		Int iLength = Manager.HumanoidPredatorRaces.Length
+		AddToggleOptionST("FemalePredatorsState", "$DVT_FemPred", Manager.femalePreds)
+		If Manager.femalePreds
+			while i < iLength
+				Int[] double = new Int[2]
+				double[0] = i + 900	;Position, plus offset.
+				String Name = Manager.HumanoidPredatorRaces[i].GetName()
+				if i == 11	;This is a frustrating workaround but it's better than space wasted with string array.
+					Name = "Snow Elf"
+				EndIf
+				double[1] = AddToggleOption(Name, Manager.HumanoidFemalePredatorToggles[i])	;OID
+				int oDouble = JArray.objectWithInts(double)
+				JIntMap.SetObj(optionsMap, double[1], oDouble)
+				i += 1 
+			endWhile
+		EndIf
+
+		AddEmptyOption()
+		addHeaderOption("Male Predator Toggles")
+
+		i = 0
+		AddToggleOptionST("MalePredatorsState", "$DVT_MalePred", Manager.malePreds)
+		If Manager.malePreds
+			while i < iLength
+				Int[] double = new Int[2]
+				double[0] = i + 600	;Position, plus offset.
+				String Name = Manager.HumanoidPredatorRaces[i].GetName()	;Since they share names maybe I could build both at once. TODO?
+				if i == 11	;This is a frustrating workaround but it's better than space wasted with string array.
+					Name = "Snow Elf"
+				EndIf
+				double[1] = AddToggleOption(Name, Manager.HumanoidMalePredatorToggles[i])	;OID
+				int oDouble = JArray.objectWithInts(double)
+				JIntMap.SetObj(optionsMap, double[1], oDouble)
+				i += 1 
+			endWhile
+		EndIf
+
+		AddEmptyOption()
+		addHeaderOption("Predator Whitelist")
+
+		iLength = Manager.PredatorWhitelist.Length
+
+		i = 1	;No need to give the player option to remove themselves.
+		AddTextOption(PlayerRef.GetLeveledActorBase().GetName(), "")
+		
+		while i < iLength
+			Int[] whitelistDouble = new Int[2]
+			whitelistDouble[0] = i + 300 ;Offset so we can differentiate this and creatures since same page.
+			whitelistDouble[1] = AddTextOption(Manager.PredatorWhitelist[i].GetLeveledActorBase().GetName(), "Remove?")	;OID
+			int owhitelistDouble = JArray.objectWithInts(whitelistDouble)
+			JIntMap.SetObj(optionsMap, whitelistDouble[1], owhitelistDouble)
+			i += 1 
+		endWhile
+
+		setCursorPosition(1)
+
+		addHeaderOption("Creature Predator Toggles")
+		AddToggleOptionST("CreaturePredatorsState", "$DVT_creaturePred", Manager.creaturePreds)
+		If Manager.CreaturePreds ;&& rebuildCreatureMenu
+			i = 0
+			iLength = Manager.CreaturePredatorRaces.Length
+			While i < iLength
+				Int[] double = new Int[2]
+				double[0] = i	;POSITION
+				String Name = Manager.CreaturePredatorRaces[i].GetName()
+				if i == 2	;This is a frustrating workaround but it's better than space wasted with string array.
+					Name = "Dragon"
+				elseif i == 28
+					Name = "Chicken"
+				elseif i == 34
+					Name = "Lurker"
+				endif
+				double[1] = AddToggleOption(Name, Manager.CreaturePredatorToggles[i])	;OID
+				int oDouble = JArray.objectWithInts(double)
+				JIntMap.SetObj(optionsMap, double[1], oDouble)
+				i += 1
+			EndWhile
+		EndIf
+		
+	ElseIf page == Pages[4]
 
 		setCursorPosition(0)
+		setCursorFillMode(LEFT_TO_RIGHT)
+		AddHeaderOption("Body Sliders vs Equipable Choice")
+		AddEmptyOption()
+		AddTextOptionST("ShowEquipableHelpState", "$DVT_EquipableBellyHelpButton", None)
 		addMenuOptionSt("equipBellyState", "$DVT_EquipableBelly", equipList[Morphs.EquippableBellyType])
+		AddEmptyOption()
+		AddEmptyOption()
+
+		setCursorFillMode(TOP_TO_BOTTOM)
+		setCursorPosition(4)
+		AddHeaderOption("Morphing Settings")
 		addToggleOptionSt("UseLocusMorphsState", "$DVT_LocusMorphs", Morphs.UseLocationalMorphs)
 		addSliderOptionSt("MorphSpeedState", "$DVT_MorphSpeed", Morphs.MorphSpeed, "{2}x")
 		addToggleOptionSt("EliminationLocusState", "$DVT_UseEliminationLocus", Morphs.UseEliminationLocus)
@@ -689,7 +748,7 @@ event OnPageReset(string page)
 		endIf
 		
 		if !Morphs.UseLocationalMorphs
-			setCursorPosition(1)
+			setCursorPosition(5)
 			addInputOptionSt("Slider_Locus0State", "$DVT_LocusSlider", Morphs.Locus_Sliders[0])
 			addSliderOptionSt("Scaling_Locus0State", "$DVT_LocusScale", Morphs.Locus_Scales[0], "{2}")
 			addEmptyOption()
@@ -714,7 +773,7 @@ event OnPageReset(string page)
 			addSliderOptionSt("Scaling_Locus2_MaxState", "$DVT_LocusMaximum", Morphs.Locus_Maxes[2], "{2}", OPTION_FLAG_DISABLED)
 			addSliderOptionSt("Chance_Locus2", "$DVT_LocusChance", LocusChances[2], "{2}")
 
-			setCursorPosition(1)
+			setCursorPosition(5)
 
 			addToggleOptionSt("DualBreastModeState", "$DVT_UseDualBreastMode", Morphs.UseDualBreastMode)
 
@@ -742,48 +801,7 @@ event OnPageReset(string page)
 			addSliderOptionSt("Scaling_Locus5_MaxState", "$DVT_LocusMaximum", Morphs.Locus_Maxes[5], "{2}")
 			addSliderOptionSt("Chance_Locus5", "$DVT_LocusChance", LocusChances[5], "{2}")
 		endIf
-	ElseIf page == Pages[5]	;Female Weight
-
-		SetCursorFillMode(LEFT_TO_RIGHT)
-		If WeightManager.SkeletonScaling
-			addSliderOptionSt("WeightFemaleRootLowState", "$DVT_RootLow", WeightManager.fSkeletonLow, "{2}")
-			addSliderOptionSt("WeightFemaleRootHighState", "$DVT_RootHigh", WeightManager.fSkeletonHigh, "{2}")
-		EndIf
-		addInputOptionSt("WeightAddFemaleMorphState", "Add Female Morph", "")
-		AddEmptyOption()
-
-		;Female morphs span elements 0 through 31.
-		AddMorphQuads(WeightManager.MorphStrings, WeightManager.MorphsLow, WeightManager.MorphsHigh, 0, 32)
-
-	ElseIf page == Pages[6]	;Male Weight
-
-		SetCursorFillMode(LEFT_TO_RIGHT)
-		If WeightManager.SkeletonScaling
-			addSliderOptionSt("WeightMaleRootLowState", "$DVT_RootLow", WeightManager.mSkeletonLow, "{2}")
-			addSliderOptionSt("WeightMaleRootHighState", "$DVT_RootHigh", WeightManager.mSkeletonHigh, "{2}")
-		EndIf
-		addInputOptionSt("WeightAddMaleMorphState", "Add Male Morph", "")
-		AddEmptyOption()
-
-		; Male morphs span elements 32 through 63.
-		AddMorphQuads(WeightManager.MorphStrings, WeightManager.MorphsLow, WeightManager.MorphsHigh, 32, 32)
-
-	;/ To be uncommented once more creature WG sliders are done. TODO
-	ElseIf page == Pages[7]	;Creature Weight
-
-		SetCursorFillMode(LEFT_TO_RIGHT)
-		If WeightManager.SkeletonScaling
-			addSliderOptionSt("WeightCreatureRootLowState", "$DVT_RootLow", cSkeletonLow, "{2}")
-			addSliderOptionSt("WeightCreatureRootHighState", "$DVT_RootHigh", cSkeletonHigh, "{2}")
-		EndIf
-		addInputOptionSt("WeightAddCreatureMorphState", "Add Creature Morph", "")
-		AddEmptyOption()
-
-		; Creature morphs span elements 64 through 95.
-		AddMorphQuads(WeightManager.MorphStrings, WeightManager.MorphsLow, WeightManager.MorphsHigh, 64, 32)
-	/;
-
-	ElseIf page == Pages[8]
+	ElseIf page == Pages[6]
 		SetCursorFillMode(LEFT_TO_RIGHT)
 
 		if SKSE.GetVersion()
@@ -792,6 +810,7 @@ event OnPageReset(string page)
 			addTextOption("SKSE", "MISSING")
 		endIf
 		
+		;/
 		if MiscUtil.FileExists("Data/DLLPlugins/NetScriptFramework.Runtime.dll") && MiscUtil.FileExists("Data/NetScriptFramework/NetScriptFramework.log.txt")
 			String NetscriptLog = MiscUtil.ReadFromFile("Data/NetScriptFramework/NetScriptFramework.log.txt")
 			AddLogVersion("NetScriptFramework", NetscriptLog, " Initializing framework version %d+", "%d+")
@@ -805,14 +824,15 @@ event OnPageReset(string page)
 			addTextOption("BugFixesSSE", "MISSING")
 			FoundBugFixesSSE = false
 		endIf
+		/;
 
-		AddSKSEDetails("SSEEngineFixes", "EngineFixes plugin", "EngineFixes plugin")
+		;AddSKSEDetails("SSEEngineFixes", "EngineFixes plugin", "EngineFixes plugin")
 		AddSKSEDetails("JContainers", "JContainers", "JContainers64", JContainers.FeatureVersion(), JContainers.APIVersion())
 		AddSKSEDetails("PapyrusUtil", "papyrusutil plugin", "papyrusutil", PapyrusUtil.GetVersion(), PapyrusUtil.GetScriptVersion())
 		AddSKSEDetails("ConsoleUtil", "console plugin", "ConsoleUtilSSE", ConsoleUtil.GetVersion())
 		AddSKSEDetails("PO3 Papyrus Extender", "PapyrusExtender", "powerofthree's Papyrus Extender")
-		AddSKSEDetails("PO3 SPID", "powerofthree's Spell Perk Distributor", "powerofthree's Spell Perk Distributor")
-		AddSKSEDetails("LibFire", "LibFire", "LibFire")
+		;AddSKSEDetails("PO3 SPID", "powerofthree's Spell Perk Distributor", "powerofthree's Spell Perk Distributor")
+		;AddSKSEDetails("LibFire", "LibFire", "LibFire")
 		AddSKSEDetails("MCM Helper", "MCMHelper", "MCMHelper")
 		AddSKSEDetails("NIOverride", "NIOverride", "skee", NIOverride.GetScriptVersion())
 		AddQuestDetails("RaceMenu", "RaceMenu", RaceMenuBase.GetScriptVersionRelease())
@@ -820,172 +840,6 @@ event OnPageReset(string page)
 	EndIf
 
 endEvent
-
-
-Event OnSettingChange(string a_ID)
-
-	if a_ID == "DraugrPred:Creatures"
-		Manager.CreaturePredatorToggles[0] = Manager.DraugrPred as Int
-	elseif a_ID == "DragonPred:Creatures"
-		Manager.CreaturePredatorToggles[1] = Manager.DragonPred as Int
-	elseif a_ID == "WolfPred:Creatures"
-		Manager.CreaturePredatorToggles[2] = Manager.WolfPred as Int
-	elseif a_ID == "DogPred:Creatures"
-		Manager.CreaturePredatorToggles[3] = Manager.DogPred as Int
-	elseif a_ID == "BearPred:Creatures"
-		Manager.CreaturePredatorToggles[4] = Manager.BearPred as Int
-	elseif a_ID == "DeerPred:Creatures"
-		Manager.CreaturePredatorToggles[5] = Manager.DeerPred as Int
-	elseif a_ID == "SabrecatPred:Creatures"
-		Manager.CreaturePredatorToggles[6] = Manager.SabrecatPred as Int
-	elseif a_ID == "HorsePred:Creatures"
-		Manager.CreaturePredatorToggles[7] = Manager.HorsePred as Int
-	elseif a_ID == "CowPred:Creatures"
-		Manager.CreaturePredatorToggles[8] = Manager.CowPred as Int
-	elseif a_ID == "GoatPred:Creatures"
-		Manager.CreaturePredatorToggles[9] = Manager.GoatPred as Int
-	elseif a_ID == "SpiderPred:Creatures"
-		Manager.CreaturePredatorToggles[10] = Manager.SpiderPred as Int
-	elseif a_ID == "ChaurusPred:Creatures"
-		Manager.CreaturePredatorToggles[11] = Manager.ChaurusPred as Int
-	elseif a_ID == "MammothPred:Creatures"
-		Manager.CreaturePredatorToggles[12] = Manager.MammothPred as Int
-	elseif a_ID == "AtronachPred:Creatures"
-		Manager.CreaturePredatorToggles[13] = Manager.AtronachPred as Int
-	elseif a_ID == "IcewraithPred:Creatures"
-		Manager.CreaturePredatorToggles[14] = Manager.IceWraithPred as Int
-	elseif a_ID == "VampireLordPred:Creatures"
-		Manager.CreaturePredatorToggles[15] = Manager.VampireLordPred as Int
-	elseif a_ID == "WerewolfPred:Creatures"
-		Manager.CreaturePredatorToggles[16] = Manager.WerewolfPred as Int
-	elseif a_ID == "TrollPred:Creatures"
-		Manager.CreaturePredatorToggles[17] = Manager.TrollPred as Int
-	elseif a_ID == "SkeeverPred:Creatures"
-		Manager.CreaturePredatorToggles[18] = Manager.SkeeverPred as Int
-	elseif a_ID == "SlaugherfishPred:Creatures"
-		Manager.CreaturePredatorToggles[19] = Manager.SlaughterfishPred as Int
-	elseif a_ID == "RabbitPred:Creatures"
-		Manager.CreaturePredatorToggles[20] = Manager.RabbitPred as Int
-	elseif a_ID == "FoxPred:Creatures"
-		Manager.CreaturePredatorToggles[21] = Manager.FoxPred as Int
-	elseif a_ID == "MudcrabPred:Creatures"
-		Manager.CreaturePredatorToggles[22] = Manager.MudcrabPred as Int
-	elseif a_ID == "SprigganPred:Creatures"
-		Manager.CreaturePredatorToggles[23] = Manager.SprigganPred as Int
-	elseif a_ID == "WispmotherPred:Creatures"
-		Manager.CreaturePredatorToggles[24] = Manager.WispmotherPred as Int
-	elseif a_ID == "GiantPred:Creatures"
-		Manager.CreaturePredatorToggles[25] = Manager.GiantPred as Int
-	elseif a_ID == "ChickenPred:Creatures"
-		Manager.CreaturePredatorToggles[26] = Manager.ChickenPred as Int
-	elseif a_ID == "HorkerPred:Creatures"
-		Manager.CreaturePredatorToggles[27] = Manager.HorkerPred as Int
-	elseif a_ID == "DwemerPred:Creatures"
-		Manager.CreaturePredatorToggles[28] = Manager.DwemerPred as Int
-	elseif a_ID == "HagravenPred:Creatures"
-		Manager.CreaturePredatorToggles[29] = Manager.HagravenPred as Int
-	elseif a_ID == "FalmerPred:Creatures"
-		Manager.CreaturePredatorToggles[30] = Manager.FalmerPred as Int
-	elseif a_ID == "DragonPriestPred:Creatures"
-		Manager.CreaturePredatorToggles[31] = Manager.DragonPriestPred as Int
-	elseif a_ID == "AshHopperPred:Creatures"
-		Manager.CreaturePredatorToggles[32] = Manager.AshHopperPred as Int
-	elseif a_ID == "GargoylePred:Creatures"
-		Manager.CreaturePredatorToggles[33] = Manager.GargoylePred as Int
-	elseif a_ID == "LurkerPred:Creatures"
-		Manager.CreaturePredatorToggles[34] = Manager.LurkerPred as Int
-	elseif a_ID == "SeekerPred:Creatures"
-		Manager.CreaturePredatorToggles[35] = Manager.SeekerPred as Int
-	endIf
-
-EndEvent
-
-event OnOptionInputOpen(int oid)
-{ Old style event handling is used for the weightmanager morphs. }
-
-	parent.OnOptionInputOpen(oid)
-	if !AssertTrue(PREFIX, "OnOptionInputOpen", "JIntMap.HasKey(optionsMap, oid)", JIntMap.HasKey(optionsMap, oid))
-		return
-	endIf
-
-	String[] MorphStrings = WeightManager.MorphStrings
-	float[] MultLow = WeightManager.MorphsLow
-	float[] MultHigh = WeightManager.MorphsHigh
-
-	; Get the quad.
-	int oq = JIntMap.GetObj(optionsMap, oid)
-	if !AssertExists(PREFIX, "OnOptionInputOpen", "oq", oq)
-		return
-	endIf
-
-	int[] quad = JArray.asIntArray(oq)
-	int index = quad[0]
-	String morph = MorphStrings[index]
-
-	if oid == quad[1]
-		SetInputDialogStartText(MorphStrings[index])
-	elseif oid == quad[2]
-		SetInputDialogStartText(MultLow[index])
-	elseif oid == quad[3]
-		SetInputDialogStartText(MultHigh[index])
-	endIf
-endEvent
-
-
-event OnOptionInputAccept(int oid, string a_input)
-{ Old style event handling is used for the weightmanager morphs. }
-	parent.OnOptionInputAccept(oid, a_input)
-
-	if !AssertTrue(PREFIX, "OnOptionInputAccept", "JIntMap.hasKey(optionsMap, oid)", JIntMap.hasKey(optionsMap, oid))
-		return
-	endIf
-
-	String[] MorphStrings = WeightManager.MorphStrings
-	float[] MultLow = WeightManager.MorphsLow
-	float[] MultHigh = WeightManager.MorphsHigh
-
-	; Get the quad.
-	int oq = JIntMap.GetObj(optionsMap, oid)
-	if !AssertExists(PREFIX, "OnOptionInputAccept", "oq", oq)
-		return
-	endIf
-
-	int[] quad = JArray.asIntArray(oq)
-	int index = quad[0]
-	String morph = MorphStrings[index]
-
-	if oid == quad[1]
-		if a_input == ""
-			WeightManager.RemoveMorph(index)
-			ForcePageReset()
-		else
-			MorphStrings[index] = a_input
-			SetInputOptionValue(oid, a_input)
-		endIf
-
-	elseif oid == quad[2]
-		float val = a_input as float
-		MultLow[index] = val
-		SetInputOptionValue(oid, val)
-	
-	elseif oid == quad[3]
-		float val = a_input as float
-		MultHigh[index] = val
-		SetInputOptionValue(oid, val)
-	endIf
-
-	resetWeights = true
-endEvent
-
-
-Function SyncWeightManager(bool registration, bool reset)
-	if registration
-		WeightManager.EventRegistration()
-	endIf
-	if reset
-		resetWeights = true
-	endIf
-EndFunction
 
 
 Event OnPageSelect(string a_page)
@@ -997,28 +851,117 @@ Event OnPageSelect(string a_page)
 EndEvent
 
 
-Function AddMorphQuads(String[] morphNames, float[] multLow, float[] multHigh, int offset, int count)
-	int index = offset
-	int endpoint = offset + count
+Event OnOptionSelect(int a_option)
 
-	while index < endpoint
-		if morphNames[index] != ""
-			int[] quad = new int[4]
-			quad[0] = index
-			quad[1] = AddInputOption("Morph", morphNames[index])
-			AddEmptyOption()
-			quad[2] = AddInputOption("Low", multLow[index])
-			quad[3] = AddInputOption("High", multHigh[index])
+	parent.OnOptionSelect(a_option)
 
-			int oQuad = JArray.objectWithInts(quad)
-			JIntMap.SetObj(optionsMap, quad[1], oQuad)
-			JIntMap.SetObj(optionsMap, quad[2], oQuad)
-			JIntMap.SetObj(optionsMap, quad[3], oQuad)
+	if !AssertTrue(PREFIX, "OnOptionSelect", "JIntMap.hasKey(optionsMap, a_option)", JIntMap.hasKey(optionsMap, a_option))
+		return
+	endIf
+
+	If CurrentPage == Pages[2]
+		; Get the double.
+		int od = JIntMap.GetObj(optionsMap, a_option)
+		if !AssertExists(PREFIX, "OnOptionSelect", "od", od)
+			return
 		endIf
 
-		index += 1
-	endWhile
-EndFunction
+		int[] double = JArray.asIntArray(od)
+		int index = double[0]
+
+		If index > 899
+			If a_option == double[1]
+				If Manager.HumanoidFemalePredatorToggles[index - 900] == 0
+					Manager.HumanoidFemalePredatorToggles[index - 900] = 1
+				Else
+					Manager.HumanoidFemalePredatorToggles[index - 900] = 0
+				EndIf
+				SetToggleOptionValue(double[1], Manager.HumanoidFemalePredatorToggles[index - 900] as Bool, false)
+			EndIf
+		elseif index > 599
+			If a_option == double[1]
+				If Manager.HumanoidMalePredatorToggles[index - 600] == 0
+					Manager.HumanoidMalePredatorToggles[index - 600] = 1
+				Else
+					Manager.HumanoidMalePredatorToggles[index - 600] = 0
+				EndIf
+				SetToggleOptionValue(double[1], Manager.HumanoidMalePredatorToggles[index - 600] as Bool, false)
+			EndIf
+		elseif index > 299
+			Manager.PredatorWhitelist = PapyrusUtil.RemoveActor(Manager.PredatorWhitelist, Manager.PredatorWhitelist[index - 300])
+			ForcePageReset()
+		else 
+			If a_option == double[1]
+				If Manager.CreaturePredatorToggles[index] == 0
+					Manager.CreaturePredatorToggles[index] = 1
+				Else
+					Manager.CreaturePredatorToggles[index] = 0
+				EndIf
+				SetToggleOptionValue(double[1], Manager.CreaturePredatorToggles[index] as Bool, false)
+			EndIf
+		endIf
+	EndIf
+
+EndEvent
+
+state ShowEquipableHelpState
+	event OnSelectST()
+    	ShowMessage("You can choose between using Sliders, or the Refactored / Classic equipable belly. Equipable bellies are compatible with almost all outfits and are an actual armor piece equipped onto predators, but look a bit worse than Sliders. Using Sliders requires you have any outfits you intend to wear converted over to a Devourment body in Bodyslide. Note that on AE, equipables are sometimes unreliable.")
+    endEvent
+endState
+
+state MalePredatorsState
+	event OnDefaultST()
+		Manager.malePreds = true
+		setToggleOptionValueST(Manager.malePreds)
+	endEvent
+
+	event OnSelectST()
+		Manager.malePreds = !Manager.malePreds
+		setToggleOptionValueST(Manager.malePreds)
+		ForcePageReset()
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("Enables vore options for male humanoids.")
+	endEvent
+endstate
+
+
+state FemalePredatorsState
+	event OnDefaultST()
+		Manager.femalePreds = true
+		setToggleOptionValueST(Manager.femalePreds)
+	endEvent
+
+	event OnSelectST()
+		Manager.femalePreds = !Manager.femalePreds
+		setToggleOptionValueST(Manager.femalePreds)
+		ForcePageReset()
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("Enables vore options for female humanoids.")
+	endEvent
+endstate
+
+
+state CreaturePredatorsState
+	event OnDefaultST()
+		Manager.creaturePreds = true
+		setToggleOptionValueST(Manager.creaturePreds)
+	endEvent
+
+	event OnSelectST()
+		Manager.creaturePreds = !Manager.creaturePreds
+		setToggleOptionValueST(Manager.creaturePreds)
+		ForcePageReset()
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText("Enables vore options for animals, monsters, and other creatures.")
+	endEvent
+endstate
 
 
 state PredPerksState
@@ -1068,200 +1011,6 @@ state PreyPerksState
 	endEvent
 endstate
 
-
-state WeightFemaleRootLowState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.fSkeletonLow)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(0.1, WeightManager.fSkeletonHigh)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.fSkeletonLow = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.fSkeletonLow = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_FemaleRootLow")
-	endEvent
-endState
-
-
-state WeightFemaleRootHighState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.fSkeletonHigh)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(WeightManager.fSkeletonLow, 5.0)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.fSkeletonHigh = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.fSkeletonHigh = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_FemaleRootHigh")
-	endEvent
-endState
-
-
-state WeightMaleRootLowState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.mSkeletonLow)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(0.1, WeightManager.mSkeletonHigh)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.mSkeletonLow = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.mSkeletonLow = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_MaleRootLow")
-	endEvent
-endState
-
-state WeightMaleRootHighState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.mSkeletonHigh)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(WeightManager.mSkeletonLow, 5.0)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.mSkeletonHigh = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.mSkeletonHigh = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_MaleRootHigh")
-	endEvent
-endState
-
-
-;/ To be uncommented once more creature WG sliders are done. TODO
-state WeightCreatureRootLowState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.cSkeletonLow)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(0.1, WeightManager.cSkeletonHigh)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.cSkeletonLow = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.cSkeletonLow = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_CreatureRootLow")
-	endEvent
-endState
-
-
-state WeightCreatureRootHighState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(WeightManager.cSkeletonHigh)
-		SetSliderDialogDefaultValue(1.0)
-		SetSliderDialogRange(WeightManager.cSkeletonLow, 5.0)
-		SetSliderDialogInterval(0.01)
-	endEvent
-
-	event OnSliderAcceptST(float a_value)
-		WeightManager.cSkeletonHigh = a_value
-		SetSliderOptionValueST(a_value, "{2}")
-	endEvent
-
-	event OnDefaultST()
-		WeightManager.cSkeletonHigh = 1.0
-		SetSliderOptionValueST(1.0, "{2}")
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("$DVT_Help_CreatureRootHigh")
-	endEvent
-endState
-/;
-
-
-state WeightAddFemaleMorphState
-	event OnInputOpenST()
-		SetInputDialogStartText("")
-	endEvent
-
-	event OnInputAcceptST(string a_input)
-		WeightManager.AddMorph(a_input, 0.0, 0.0, 0)
-		ForcePageReset()
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("Add a female weight morph.")
-	endEvent
-endState
-
-
-state WeightAddMaleMorphState
-	event OnInputOpenST()
-		SetInputDialogStartText("")
-	endEvent
-
-	event OnInputAcceptST(string a_input)
-		WeightManager.AddMorph(a_input, 0.0, 0.0, 1)
-		ForcePageReset()
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("Add a male weight morph.")
-	endEvent
-endState
-
-
-;/ To be uncommented once more creature WG sliders are done. TODO
-state WeightAddCreatureMorphState
-	event OnInputOpenST()
-		SetInputDialogStartText("")
-	endEvent
-
-	event OnInputAcceptST(string a_input)
-		WeightManager.AddMorph(a_input, 0.0, 0.0, 2)
-		ForcePageReset()
-	endEvent
-
-	event OnHighlightST()
-		SetInfoText("Add a creature weight morph.")
-	endEvent
-endState
-/;
 
 state Scaling_Locus0State
 	Event OnSliderOpenST()
@@ -1919,9 +1668,9 @@ state equipBellyState
 
 	event OnHighlightST()
 		if Morphs.EquippableBellyType == 1
-			SetInfoText("Equip the Macross morphvore belly with struggle sliders.\nCopies the body skin texture and generally looks excellent with any CBBE or 3BA body.")
+			SetInfoText("Equip the Refactored equipable belly with struggle sliders.\nCopies the body skin texture and generally looks excellent with any CBBE or 3BA body.")
 		elseif Morphs.EquippableBellyType == 2
-			SetInfoText("Equip the SkepticMech morphvore belly with struggle sliders.\nUses Xomod texturing and is relatively compatible with CBBE, 3BA, UNP, UUNP, and BHUNP.")
+			SetInfoText("Equip the Classic equipable belly with struggle sliders.\nUses Xomod texturing and is relatively compatible with CBBE, 3BA, UNP, UUNP, and BHUNP.")
 		else
 			SetInfoText("Don't use any equipable belly.")
 		endIf
@@ -2217,7 +1966,7 @@ Function DisplayQuickSettings()
 			exit = true
 
 		elseif result == ENTRY_VOMIT
-			if subject == PlayerRef || LibFire.ActorIsFollower(subject)
+			if subject == PlayerRef || subject.IsPlayerTeammate()
 				Power_Regurgitate.cast(subject, subject)
 			endIf
 			exit = true
@@ -2225,13 +1974,13 @@ Function DisplayQuickSettings()
 		elseif result == ENTRY_FORTIS
 			if subject == PlayerRef
 				Power_DigestItems.cast(PlayerRef, PlayerRef)
-			elseif LibFire.ActorIsFollower(subject)
+			elseif subject.IsPlayerTeammate()
 				Power_DigestItems.cast(subject, subject)
 			endIf
 			exit = true
 
 		elseif result == ENTRY_POOP
-			if subject == PlayerRef || LibFire.ActorIsFollower(subject)
+			if subject == PlayerRef || subject.IsPlayerTeammate()
 				Power_Defecate.cast(subject, subject)
 			endIf
 			exit = true
@@ -2248,7 +1997,7 @@ Function DisplayQuickSettings()
 			exit = true
 
 		elseif result == ENTRY_TURNLETHAL
-			if subject == PlayerRef || LibFire.ActorIsFollower(subject)
+			if subject == PlayerRef || subject.IsPlayerTeammate()
 				Manager.SwitchLethalAll(subject, true)
 			endIf
 			exit = true
@@ -2301,7 +2050,6 @@ Function AddPredContents(UIListMenu menu, int parentEntry, Actor pred)
 		endWhile
 	endIf
 EndFunction
-
 
 Function AddBolusContents(UIListMenu menu, int parentEntry, ObjectReference bolus)
 	Form[] bolusContents = bolus.GetContainerForms()

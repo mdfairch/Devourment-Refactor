@@ -11,7 +11,6 @@ Actor property PlayerRef auto
 Armor[] property Fullnesses auto
 FormList property FullnessTypes_All auto
 Keyword property ActorTypeNPC auto
-String[] property StruggleSliders auto
 
 
 String PREFIX = "DevourmentBellyScaling"
@@ -35,6 +34,7 @@ bool PlayerStruggleBumps
 
 
 String[] Sliders
+String[] StruggleSliders
 bool[] isNode
 
 
@@ -84,6 +84,7 @@ event OnEffectStart(Actor akTarget, Actor akCaster)
 	Manager.CommitMorphsToDB()
 
 	Sliders = Morphs.Locus_Sliders
+	StruggleSliders = Morphs.StruggleSliders
 	IsNode = Utility.CreateBoolArray(Sliders.length)
 
 	int sliderIndex = Sliders.length
@@ -98,13 +99,18 @@ event OnEffectStart(Actor akTarget, Actor akCaster)
 		if EquippableBellyType >= 0 && EquippableBellyType < Fullnesses.length
 			Armor belly = Fullnesses[EquippableBellyType]
 			target.equipItem(belly, false, true)
-
 			if !belly.HasKeywordString("SexlabNoStrip")
 				Keyword NoStrip = Keyword.GetKeyword("SexlabNoStrip")
 				if NoStrip
 					PO3_SKSEFunctions.AddKeywordToForm(belly, NoStrip)
 				endIf
 			endIf
+			if EquippableBellyType > 0	
+				Sliders[0] == "Equipable Vore prey belly"
+				StruggleSliders[0] = "Equipable StruggleSlider1"
+				StruggleSliders[1] = "Equipable StruggleSlider2"
+				StruggleSliders[2] = "Equipable StruggleSlider3"
+			EndIf
 		else
 			target.removeItem(FullnessTypes_All, 99, true)
 		endIf

@@ -34,13 +34,11 @@ LOCUS_COCK 		= 5
 ;
 ; PLANNED FEATURES
 ; * Check Devious Devices keywords
-; * Subdivide and make WeightGain morphs for all creatures.
 ; * Option to stop Vore Magic perks gating Vore spells outright.
 ; * Silent Swallow makes Disposal noises silent to the user ??
 ; * Add something to make Dragons that vore the player stay put.
 ; * SCL-inspired PlayerThoughts function?
 ; * Dialogue to intiiate Vore with friendly animals ?
-; * Seperate out WeightManager settings so people can import/export their bodyshapes easier.
 ; * Now that the onload dependancy check is gone, make child checks less frustrating.
 ; * True Directional Movement camera patch. Maybe reach out?
 ; * Reach out to MMG or whoever made Horny Creatures / whatever nsfw creature mod people like for conversion permission.
@@ -72,16 +70,24 @@ CommonMeterInterfaceHandler[] property PreyStruggleMeters Auto
 Container property BolusContainer auto
 Container[] property RemainsFeces auto
 DevourmentMCM property Menu auto
-DevourmentNewDova property NewDova auto
 DevourmentRemap property Remapper auto
 DevourmentPlayerAlias property PlayerAlias auto
 DevourmentReformationQuest property ReformationQuest auto
 DevourmentSkullHandler property SkullHandler auto
-DevourmentWeightManager property WeightManager auto
 Explosion property BoneExplosion auto
 Faction property PlayerFaction auto
 FormList property FullnessTypes_All auto
-Form[] property EMPTY auto
+Actor[] property PredatorWhitelist auto
+{ Predators inside this can always Vore, no matter other settings. Contains Player by default. }
+;/
+PERSISTENCE NOTES: "When a script property is pointed at a reference in the editor, the target reference will be flagged as "permanently persistent". 
+In other words, nothing you do during runtime will unload the object. This means that, if possible, you should not use properties to point at references directly. 
+If you can, pull references in from events or other locations to avoid permanently keeping them around." 
+https://www.creationkit.com/index.php?title=Persistence_(Papyrus)#Properties 
+
+I was concerned making an Actor[] property in Skyrim I fill in-game would make Actors persistent. I'm keeping this note to remind myself this is fine.
+/;
+
 GlobalVariable property Devourment_PerkPoints auto
 GlobalVariable property Devourment_PredProgress auto
 GlobalVariable property Devourment_PredSkill auto
@@ -94,9 +100,10 @@ GlobalVariable property Devourment_ShowPreyPerks auto
 GlobalVariable property PreyWeightEdit auto
 GlobalVariable[] property HealthMeterColours auto
 Idle Property IdleStop Auto
-Idle property IdleDragon auto
 Idle property IdleVore auto
 Int[] property CreaturePredatorToggles auto
+Int[] property HumanoidMalePredatorToggles auto
+Int[] property HumanoidFemalePredatorToggles auto
 Keyword property ActorTypeAnimal auto
 Keyword property ActorTypeCreature auto
 Keyword property ActorTypeDaedra auto
@@ -118,8 +125,8 @@ Keyword property Vampire auto
 Keyword property VoreTalker auto
 Keyword property Vorish auto
 Keyword[] property RaceDigestionKeywords auto
-Message property MessageDisabled auto
 Message property MenuPreyWeight auto
+Message property MenuWhitelist auto
 Message property Message_NowDigesting auto
 Message property Message_Vomited auto
 Message property UnclogMessage auto
@@ -133,8 +140,11 @@ ObjectReference property HerStomach auto
 Outfit property DigestionOutfit auto
 PlayerVampireQuestScript property PlayerVampireQuest auto
 Race property Dragon auto
+Race[] property CreaturePredatorRaces auto
+Race[] property HumanoidPredatorRaces auto
 ReferenceAlias property PredNameAlias auto
 ReferenceAlias property PreyNameAlias auto
+ReferenceAlias property WhitelistNameAlias auto
 SoulGem[] property Soulgems auto
 Sound property BoneSound_Female auto
 Sound property BoneSound_Male auto
@@ -145,7 +155,6 @@ Sound property VomitSound auto
 Sound[] property DeathScreams auto
 Sound[] property ScatSounds auto
 Spell property DevourmentSlow auto
-Spell property MacromancySU auto
 Spell property FakePotion auto
 Spell property NotThere auto
 Spell property NotThere_Friendly auto
@@ -156,7 +165,7 @@ Spell property ScriptedVore auto
 Spell property CordycepsFrenzy auto
 Spell[] property SoundsOfDigestion auto
 Spell[] property StatusSpells auto
-String[] property CreaturePredatorStrings auto
+Static Property AnimationMarker Auto
 String[] property Skills auto
 int[] property EdibleTypes auto
 
@@ -165,16 +174,15 @@ int[] property EdibleTypes auto
 bool property AnalEscape = false auto
 bool property CombatAcceleration = false auto
 bool property SoftDeath = false auto
-bool property creaturePreds = true auto
+bool property creaturePreds = false auto
 bool property crouchScat = true auto
 bool property drawnAnimations = true auto
 bool property endoAnyone = false auto
-bool property femalePreds = true auto
+bool property femalePreds = false auto
 bool property killEssential = false auto
 bool property killNPCs = true auto
 bool property killPlayer = true auto
-bool property MicroMode = false auto
-bool property malePreds = true auto
+bool property malePreds = false auto
 bool property notifications = true auto
 bool property screamSounds = true auto
 bool property shitItems = false auto
@@ -189,43 +197,6 @@ bool property ComplexStruggles = false auto
 bool property SkillGain = true auto
 bool property AttributeGain = true auto
 
-bool property draugrPred = true Auto
-bool property dragonPred = true Auto
-bool property wolfPred = true Auto
-bool property dogPred = true Auto
-bool property bearPred = true Auto
-bool property deerPred = true Auto
-bool property sabrecatPred = true Auto
-bool property horsePred = true Auto
-bool property cowPred = true Auto
-bool property GoatPred = true Auto
-bool property SpiderPred = true Auto
-bool property ChaurusPred = true Auto
-bool property MammothPred = true Auto
-bool property AtronachPred = true Auto
-bool property IceWraithPred = true Auto
-bool property VampireLordPred = true Auto
-bool property WerewolfPred = true Auto
-bool property TrollPred = true Auto
-bool property SkeeverPred = true Auto
-bool property SlaughterfishPred = true Auto
-bool property RabbitPred = true Auto
-bool property FoxPred = true Auto
-bool property MudcrabPred = true Auto
-bool property SprigganPred = true Auto
-bool property WispmotherPred = true Auto
-bool property GiantPred = true Auto
-bool property ChickenPred = true Auto
-bool property HorkerPred = true Auto
-bool property DwemerPred = true Auto
-bool property HagravenPred = true Auto
-bool property FalmerPred = true Auto
-bool property DragonPriestPred = true Auto
-bool property AshHopperPred = true Auto
-bool property GargoylePred = true Auto
-bool property LurkerPred = true Auto
-bool property SeekerPred = true Auto
-
 float property AcidDamageModifier = 1.0 auto
 float property BurpsRate = 16.0 auto
 float property GurglesRate = 8.0 auto
@@ -239,12 +210,9 @@ float property NomsChance = 0.05 auto
 float property prefilledChance = 0.0 auto
 float property struggleDamage = 1.0 auto
 float property CombatChanceScale = 1.0 auto
-float property MacromancyScaling = 1.2 auto
-float property Cooldown_Follower = 10.0 auto
 float property Cooldown_Creature = 4.0 auto
 float property Cooldown_NPC = 6.0 auto
 int property AutoNoms = 0 auto
-int property MacromancyMode = 0 auto
 int property multiPrey = 2 Auto
 int property scatTypeBolus = 1 auto
 int property scatTypeCreature = 1 auto
@@ -253,7 +221,6 @@ int property playerPreference = 0 auto
 int property companionPredPreference = 0 auto
 int property VomitStyle = 2 auto
 int property whoStruggles = 2 auto
-int property BYK = 0 auto
 
 
 float property DigestionTime = 240.0 auto
@@ -311,13 +278,13 @@ int property MULTI_UNLIMITED = 4 autoreadonly
 ; Animation flags
 bool property FNISDetected
 	bool Function get()
-		if _FNISDetected < 0
-			_FNISDetected = Game.GetPlayer().GetAnimationVariableInt("DevourmentAnimationVersion")
+		if _FNISDetected == false
+			_FNISDetected = FNIS.IsGenerated()
 		endIF
-		return _FNISDetected > 0
+		return _FNISDetected
 	endFunction
 endproperty 
-int _FNISDetected = -1
+bool _FNISDetected = false
 
 bool FrostFallInstalled = false
 
@@ -417,13 +384,25 @@ script. Instead it's called from DevourmentPlayerAlias.
 		return
 	endIf
 
+	;/
+	Note from Gaz. At one point we enforced these checks as a way to prevent underage mods. 
+	I have seen how these mods work and don't care to engage in an arms race against them to the detriment of the less profane parts of the userbase.
+
 	if !(Game.GetFormFromFile(0x1a66b, "Skyrim.esm") as Actor).IsChild() \
 	|| !(Game.GetFormFromFile(0x1348b, "Skyrim.esm") as Actor).IsChild() \
 	|| Game.GetModByName("NonEssentialChildren.esp") != 255 \
 	|| Game.GetModByName("RCOTS-RACES.esm") != 255 \
-	|| Game.GetModByName("Children Fight Back.esp") != 255
+	|| Game.GetModByName("Children Fight Back.esp") != 255 \
+	|| Game.GetModByName("Killable Children.esp") != 255 \
+	|| Game.GetModByName("ImCh.esm") != 255 \
+	|| Game.GetModByName("Simple Killable Children.esp") != 255 \
+	|| (Game.GetFormFromFile(0x956, "Devourment.esp") as Formlist).GetSize() != 50
 		MessageDisabled.Show()
+		ResetDevourment()
+		Self.GoToState("Waiting")
+		Self.Stop()
 	endIf
+	/;
 	
 	; Make sure that the devourment database exists.
 	; If it doesn't, then recreate it and display an error message.
@@ -616,13 +595,6 @@ Return value is a flag indicating whether the predator is still active.
 	if isDead && !IsPrey(pred)
 		Log1(PREFIX, "ProcessPredator", Namer(pred) + " is dead. Calling RegisterVomitAll().")
 		RegisterVomitAll(pred, forced = true)
-	elseif MicroMode
-		float fullness = GetFullness(pred)
-		if fullness > 1.3
-			RegisterVomitAll(pred, forced = true)
-		elseif fullness > 1.0
-			GiveCapacityXP(pred, 0.01 * dt * (fullness - 0.8))
-		endIf
 	endIf
 
 	; Get the predData object, which identifies the pred and contains the stomach list.
@@ -1352,9 +1324,6 @@ function FinishLiveDigestion(Actor pred, Actor prey, int preyData)
 	playBurp_async(pred)
 	UpdateSounds_async(pred)
 
-	; Do the skull stuff!
-	AddSkull_Async(pred, prey)
-
 	; Equipment stripping.
 	bool isNPC = prey.HasKeyword(ActorTypeNPC)
 	if (isNPC && ScatTypeNPC == 0 && ScatTypeBolus > 0) || (!isNPC && ScatTypeCreature == 0 && ScatTypeBolus > 0)
@@ -1426,6 +1395,49 @@ function FinishLiveDigestion(Actor pred, Actor prey, int preyData)
 endFunction
 
 
+Function WeightGain_async(Actor pred, Actor prey, bool gain)
+{ Used to call WeightGain asynchronously using a ModEvent. }
+	if WeightGain > 0.0
+		int handle = ModEvent.create("Devourment_WeightGain")
+		ModEvent.pushForm(handle, pred)
+		ModEvent.pushForm(handle, prey)
+		ModEvent.pushBool(handle, gain)
+		ModEvent.Send(handle)
+	endIf
+EndFunction
+		
+		
+Event WeightGain(Form f1, Form f2, bool gain)
+	Actor pred = f1 as Actor
+	ActorBase predBase = pred.getLeveledActorBase()
+	
+	if WeightGain > 0.0
+		float oldweight = predBase.getWeight()
+		if oldweight < 100.0
+			float newWeight
+			if gain
+				newWeight = oldweight + WeightGain
+				if newWeight > 100.0
+					newWeight = 100.0
+				endIf
+			else
+				newWeight = oldweight - WeightGain
+				if newWeight < 0.0
+					newWeight = 0.0
+				endIf
+			endIf
+	
+			predBase.setWeight(newWeight)
+				
+			if !pred.IsOnMount()
+				pred.updateWeight(oldweight / 100 - newWeight / 100.0)
+				pred.QueueNiNodeUpdate()
+			endIf
+		endIf
+	endIf	
+EndEvent
+
+
 Function Entitlement_async(Actor pred, Actor prey)
 { Used to call Entitlement asynchronously using a ModEvent. }
 	int handle = ModEvent.create("Devourment_Entitlement")
@@ -1469,49 +1481,6 @@ Event Entitlement(Form f1, Form f2)
 	StorageUtil.SetStringValue(pred, "DevourmentTitle", newName)
 	StorageUtil.SetIntValue(pred, "DevourmentTitleRank", newLevel)
 EndEvent 
-
-
-Function WeightGain_async(Actor pred, Actor prey, bool gain)
-{ Used to call WeightGain asynchronously using a ModEvent. }
-	if WeightGain > 0.0
-		int handle = ModEvent.create("Devourment_WeightGain")
-		ModEvent.pushForm(handle, pred)
-		ModEvent.pushForm(handle, prey)
-		ModEvent.pushBool(handle, gain)
-		ModEvent.Send(handle)
-	endIf
-EndFunction
-	
-	
-Event WeightGain(Form f1, Form f2, bool gain)
-	Actor pred = f1 as Actor
-	ActorBase predBase = pred.getLeveledActorBase()
-
-	if WeightGain > 0.0
-		float oldweight = predBase.getWeight()
-		if oldweight < 100.0
-			float newWeight
-			if gain
-				newWeight = oldweight + WeightGain
-				if newWeight > 100.0
-					newWeight = 100.0
-				endIf
-			else
-				newWeight = oldweight - WeightGain
-				if newWeight < 0.0
-					newWeight = 0.0
-				endIf
-			endIf
-
-			predBase.setWeight(newWeight)
-			
-			if !pred.IsOnMount()
-				pred.updateWeight(oldweight / 100 - newWeight / 100.0)
-				pred.QueueNiNodeUpdate()
-			endIf
-		endIf
-	endIf	
-EndEvent
 
 
 Function DeadReforming(Actor pred, Actor prey, int preyData, float dt)
@@ -1642,15 +1611,18 @@ Event DeadDigested(Form f1, Form f2, int preyData)
 
 		if (isNPC && scatTypeNPC == 0) || (!isNPC && scatTypeCreature == 0)
 			AbsorbRemains(pred, prey, preyData)
+			AddSkull_Async(pred, prey)
 			SendDeadDigestionEvent(pred, prey, 0.0)
 		elseif (isNPC && (scatTypeNPC == 1 || scatTypeNPC == 2)) || (!isNPC && scatTypeCreature == 1) 
 			if !pred.IsInCombat() && (notInPlayerHome(pred) || pred.isDead())
 				ExpelRemains(pred, prey, preyData)
+				AddSkull_Async(pred, prey)
 				SendDeadDigestionEvent(pred, prey, 0.0)
 			endIf
 		elseif (isNPC && scatTypeNPC == 3) || (!isNPC && scatTypeNPC == 2)
 			if pred != PlayerRef && (notInPlayerHome(pred) || pred.isDead())
 				RegisterVomit(prey)
+				AddSkull_Async(pred, prey)
 				SendDeadDigestionEvent(pred, prey, 0.0)
 			endIf
 		endIf
@@ -1909,6 +1881,8 @@ function AbsorbRemains(Actor pred, ObjectReference content, int preyData)
 	endIf
 
 	if content as Actor
+		ConsoleUtil.SetSelectedReference(content as Actor)	;Fix brought to my attention by this mod: https://www.nexusmods.com/skyrimspecialedition/mods/62413?tab=description
+		ConsoleUtil.ExecuteCommand("unequipall")
 		content.removeAllItems(apex, false, true)
 		UnassignPreyMeters(content as Actor)
 		content.disable()
@@ -1957,7 +1931,7 @@ function ExpelRemains(Actor pred, ObjectReference content, int preyData)
 	; called -- which will either kill the player or make the player the pred.
 	if apex == playerRef && !(crouchScat && apex.isSneaking() && !apex.IsWeaponDrawn())
 		return
-	elseif !RegisterBlock("ExpelRemains", pred)
+	elseif apex != pred || !RegisterBlock("ExpelRemains", pred)
 		return
 	endIf
 	
@@ -2262,6 +2236,8 @@ Removes a single dead content from the pred and places a scat pile or bones behi
 		endIf
 		
 		if prey != playerRef
+			ConsoleUtil.SetSelectedReference(prey)
+			ConsoleUtil.ExecuteCommand("unequipall")
 			prey.removeAllItems(pile, false, true)
 		else
 			; Move the player (who is still both invisible and dead) to the pile.
@@ -2294,12 +2270,9 @@ Removes a single dead content from the pred and places a scat pile or bones behi
 		Container feces = GetFecesType(prey)
 		ObjectReference pile = apex.placeAtMe(feces, 1, true, false)
 		
-		; Only scale generic feces.
-		if feces == RemainsFeces[7] 
-			pile.setScale(Math.sqrt(GetVoreWeight(prey) / 100.0))
-		endIf
+		pile.setScale(Math.sqrt(GetVoreWeight(prey) / 100.0))
+		pile.setAngle(0.0, 0.0, Utility.RandomFloat(0.0,360.0))
 
-		pile.setAngle(0.0, 0.0, 0.0)
 		
 		if prey != playerRef
 			prey.removeAllItems(pile, false, true)
@@ -2460,9 +2433,9 @@ Function ReformPrey(Actor pred, Actor prey, int preyData)
 	prey.IgnoreFriendlyHits(true)
 	prey.SetGhost(false)
 
-	if pred == playerRef && prey == playerRef && NewDova.deadDovaRef != None
-		prey = NewDova.deadDovaRef
-	endIf
+	;if pred == playerRef && prey == playerRef && NewDova.deadDovaRef != None
+	;	prey = NewDova.deadDovaRef
+	;endIf
 	
 	; Make the prey friendly towards the pred.
 	if prey == playerRef
@@ -2478,10 +2451,8 @@ Function ReformPrey(Actor pred, Actor prey, int preyData)
 		prey.AddToFaction(PlayerFaction)
 		prey.RemoveFromFaction(prey.GetCrimeFaction())
 	endIf
-	
-	WeightGain_Async(pred, prey, false)
-	WeightManager.ChangeActorWeight(prey, -1.0, source="reformed")
 
+	WeightGain_Async(pred, prey, false)
 	DeactivatePrey(prey)
 	SetEndo(preyData, prey != playerRef && pred != playerRef)
 	SetMeters_Reformed(prey)
@@ -2499,7 +2470,7 @@ Function KillPlayer(Actor pred)
 
 	UnassignAllPreyMeters()
 
-	if BYK == 0 && PlayerRef.HasPerk(Menu.Phylactery)
+	if PlayerRef.HasPerk(Menu.Phylactery) ;BYK == 0 &&
 		Log1(PREFIX, "KillPlayer", "Phylactery.")
 		if IsPrey(pred)
 			DefecateOne(playerRef, force = true)
@@ -2508,16 +2479,16 @@ Function KillPlayer(Actor pred)
 		ReplacePrey(pred, playerRef, fakePlayer)
 		ReformationQuest.StartReformation()
 	
-	elseif BYK == 0 && Menu.AutoRebirth && GetLocusFor(PlayerRef) == 2 && !IsPrey(pred)
+	elseif Menu.AutoRebirth && GetLocusFor(PlayerRef) == 2 && !IsPrey(pred) ;BYK == 0 &&
 		RegisterReformation(pred, PlayerRef, 2)
 			
-	elseif BYK == 0 && pred.hasKeyword(ActorTypeNPC)
-		Log1(PREFIX, "KillPlayer", "BYK is 0 -- no reincarnation.")
+	elseif pred.hasKeyword(ActorTypeNPC) ;BYK == 0 &&
+		Log1(PREFIX, "KillPlayer", "No reincarnation.")
 		KillPlayer_ForReal()
 		
-	elseif BYK < 2 && pred.hasKeyword(ActorTypeCreature)
-		Log1(PREFIX, "KillPlayer", "BYK is < 2 -- no reincarnation as a creature.")
-		KillPlayer_ForReal()
+	;elseif BYK < 2 && pred.hasKeyword(ActorTypeCreature)
+	;	Log1(PREFIX, "KillPlayer", "BYK is < 2 -- no reincarnation as a creature.")
+	;	KillPlayer_ForReal()
 		
 	elseif IsPrey(pred) 
 		Log1(PREFIX, "KillPlayer", "Pred is not the apex -- no reincarnation.")
@@ -2527,7 +2498,8 @@ Function KillPlayer(Actor pred)
 		assertFail(PREFIX, "KillPlayer", "!VerifyPred(playerRef)")
 		KillPlayer_ForReal()
 		
-	else
+	;else
+		;/
 		RegisterBlocks("KillPlayer", playerRef, pred)
 		
 		; BYK IS set, so we have to completely disable the predator and then turn
@@ -2559,6 +2531,7 @@ Function KillPlayer(Actor pred)
 		UpdateSounds_async(playerRef)
 		SendNewCharacterEvent(pred, playerRef)
 		RestoreAllPreyMeters()
+		/;
 	endIf
 EndFunction
 
@@ -3391,7 +3364,7 @@ run in parallel to the main loop.
 		elseif hp
 			Notify(predName + " gained " + gain as int + " points of health from " + preyName)
 		elseif sp
-			Notify(predName + " gained " + gain as int + " points of staminafrom " + preyName)
+			Notify(predName + " gained " + gain as int + " points of stamina from " + preyName)
 		elseif mp
 			Notify(predName + " gained " + gain as int + " points of magicka from " + preyName)
 		endIf
@@ -3570,7 +3543,6 @@ Calculate the swallow chance for a pred/prey endo combination. The calculation i
 + Speechcraft
 
 If no prey is specified, the fakePlayer will be used.
-Failure is automatic if MicroMode is enabled and the size difference between the pred and prey is not at least 20%.
 Success is automatic for followers or lovers.
 }
 
@@ -3584,11 +3556,9 @@ Success is automatic for followers or lovers.
 	float predSize = GetVoreWeight(pred)
 	float preySize = GetVoreWeight(prey)
 
-	if MicroMode && preySize > 0.0 && predSize/preySize < 1.2
-		return 0.0
-	elseif relationship >= 4.0 || endoAnyone
+	if relationship >= 4.0 || endoAnyone
 		return 1.0
-	elseif pred == playerRef && LibFire.ActorIsFollower(prey)
+	elseif pred == playerRef && prey.IsPlayerTeammate()
 		return 1.0
 	elseif prey.HasKeyword(KeywordSurrender)
 		return 1.0
@@ -3624,7 +3594,6 @@ Calculate the swallow chance for a pred/prey vore combination. The calculation i
 - Magic effects that fortify slipperiness for the prey.
 
 If no prey is specified, the fakePlayer will be used.
-Failure is automatic if MicroMode is enabled and the size difference between the pred and prey is not at least 20%.
 Success is automatic for prey that is dead, bleeding out, surrendered, or asleep (if the pred has silent swallow).
 }
 	if DEBUGGING
@@ -3636,9 +3605,7 @@ Success is automatic for prey that is dead, bleeding out, surrendered, or asleep
 	float preySize = GetVoreWeight(prey)
 
 	; These cases allow automatic success or failure.
-	if MicroMode && preySize > 0.0 && GetFullnessWith(pred,prey) > 2.0
-		return 0.0
-	elseif prey.isDead() || prey.isBleedingOut() || prey.HasMagicEffectWithKeyword(KeywordSurrender)
+	if prey.isDead() || prey.isBleedingOut() || prey.HasMagicEffectWithKeyword(KeywordSurrender)
 		return 1.0
 	elseif pred.hasPerk(Menu.SilentSwallow) && prey.getSleepState() > 2
 		return 1.0
@@ -3865,8 +3832,6 @@ Function ReappearPreyAt(Actor prey, ObjectReference loc, float lateral = 0.0, fl
 
 	if StorageUtil.HasIntValue(prey, "DevourmentReborn")
 		StorageUtil.UnsetIntValue(prey, "DevourmentReborn")
-		DevourmentMacromancySU.SetSize(prey, 0.2)
-		MacromancySU.cast(prey, prey)
 	endIf
 	
 	if prey.hasSpell(NotThere_Friendly)
@@ -4424,7 +4389,6 @@ Function ResetActor(Actor target, ObjectReference place)
 	target.removeSpell(NotThere)
 	target.removeSpell(CordycepsFrenzy)
 	target.setAlpha(100.0, false)
-	ResetActorWeight(target)
 	NiOverride.RemoveNodeTransformScale(target, false, IsFemale(target), "NPC Head [Head]", PREFIX)
 	NiOverride.UpdateNodeTransform(target, false, IsFemale(target), "NPC Head [Head]")
 	target.resethealthandlimbs()
@@ -4433,9 +4397,17 @@ Function ResetActor(Actor target, ObjectReference place)
 EndFunction
 
 
-Event ResetActorWeight(ObjectReference f)
-	WeightManager.ResetActorWeight(f as Actor)
-EndEvent
+Function WhitelistPredator()
+	ObjectReference targeted = Game.GetCurrentCrossHairRef()
+	If targeted as Actor
+		WhitelistNameAlias.ForceRefTo(targeted)
+		Int Choice = MenuWhitelist.Show()
+		If Choice == 0
+			PredatorWhitelist = PapyrusUtil.PushActor(PredatorWhitelist, targeted as Actor)
+		EndIf
+		WhitelistNameAlias.Clear()
+	EndIf
+EndFunction
 
 
 Function HotkeyDialogue()
@@ -4545,13 +4517,13 @@ endFunction
 
 
 bool Function IsValidDigestion(Actor pred, Actor prey)
-	int keywordIndex = LibFire.ActorFindAnyKeyword(prey, RaceDigestionKeywords)
+	;int keywordIndex = LibFire.ActorFindAnyKeyword(prey, RaceDigestionKeywords)
 
-	if keywordIndex == 0 ; prey.hasKeyword(ActorTypeUndead)
+	if prey.hasKeyword(ActorTypeUndead) ; keywordIndex == 0
 		return pred.hasPerk(Menu.DigestionUndead)
-	elseif keywordIndex == 1 ; prey.hasKeyword(ActorTypeDaedra)
+	elseif prey.hasKeyword(ActorTypeDaedra) ; keywordIndex == 1
 		return pred.hasPerk(Menu.DigestionDaedric)
-	elseif keywordIndex == 2 ; prey.hasKeyword(ActorTypeDwarven)
+	elseif prey.hasKeyword(ActorTypeDwarven) ; keywordIndex == 2
 		return pred.hasPerk(Menu.DigestionDwemer)
 	else
 		return true
@@ -4579,17 +4551,17 @@ Determines if a prey is eligible to be digested.
 	Actor pred = f1 as Actor
 	Actor prey = f2 as Actor
 
-	int keywordIndex = LibFire.ActorFindAnyKeyword(prey, RaceDigestionKeywords)
+	;int keywordIndex = LibFire.ActorFindAnyKeyword(prey, RaceDigestionKeywords)
 
-	if keywordIndex == 0 ; prey.hasKeyword(ActorTypeUndead)
+	if prey.hasKeyword(ActorTypeUndead) ; keywordIndex == 0
 		if !pred.hasPerk(Menu.DigestionUndead)
 			HandleInvalidDigestion(MessageIndigestible[0], pred, prey)
 		endIf
-	elseif keywordIndex == 1 ; prey.hasKeyword(ActorTypeDaedra)
+	elseif prey.hasKeyword(ActorTypeDaedra) ; keywordIndex == 1
 		if !pred.hasPerk(Menu.DigestionDaedric)
 			HandleInvalidDigestion(MessageIndigestible[1], pred, prey)
 		endIf
-	elseif keywordIndex == 2 ; prey.hasKeyword(ActorTypeDwarven)
+	elseif prey.hasKeyword(ActorTypeDwarven) ; keywordIndex == 2
 		if !pred.hasPerk(Menu.DigestionDwemer)
 			HandleInvalidDigestion(MessageIndigestible[2], pred, prey)
 		endIf
@@ -4723,7 +4695,7 @@ bool Function IsFull(Actor pred)
 			ConsoleUtil.PrintMessage(Namer(pred) + " is " + fullness + "%% full (capacity=" + GetCapacity(pred) + ", burden=" + GetFullness(pred) + ").")
 		endIf
 		return GetFullness(pred) >= 1.0
-		
+	
 	else
 		if DEBUGGING
 			ConsoleUtil.PrintMessage(Namer(pred) + " is never full.")
@@ -4734,21 +4706,19 @@ EndFunction
 
 
 bool Function validPredator(Actor target)
-	if target == None || target.isChild()
+	If target == None || target.isChild()
 		return false
-	elseif companionPredPreference > 0 && LibFire.ActorIsFollower(target)
-        return companionPredPreference == 1
-    elseif target.hasKeyword(ActorTypeCreature)
-		if creaturePreds
-			String raceName = Remapper.RemapRaceName(target)
-			int index = CreaturePredatorStrings.Find(raceName)
-			return index >= 0 && CreaturePredatorToggles[index]
-		Else
-			return false
-		endIf
-	elseIf target.HasKeyword(ActorTypeNPC)
+	ElseIf PredatorWhitelist.find(target) >= 0
+		return true
+    ElseIf target.hasKeyword(ActorTypeCreature) && creaturePreds
+		Race baseRace = Remapper.RemapRace(target.GetLeveledActorBase().getRace())
+		int index = CreaturePredatorRaces.Find(baseRace)
+		return index >= 0 && CreaturePredatorToggles[index]
+	elseIf target.HasKeyword(ActorTypeNPC) && (MalePreds || FemalePreds)
 		int sex = target.getLeveledActorBase().getSex()	;We only care for Sex where humanoids are concerned.
-		return (sex == 0 && MalePreds) || (sex != 0 && FemalePreds)
+		Race baseRace = Remapper.RemapRace(target.GetLeveledActorBase().getRace())
+		int index = HumanoidPredatorRaces.Find(baseRace)
+		return (sex == 0 && HumanoidMalePredatorToggles[index] && MalePreds) || (sex != 0 && HumanoidFemalePredatorToggles[index] && FemalePreds)
 	else
 		Return False
 	endIf
@@ -4757,14 +4727,13 @@ EndFunction
 
 bool Function areFriends(Actor pred, Actor prey)
 	if pred == playerRef
-		 return prey.getRelationshipRank(pred) > 0 \
-		 	|| LibFire.ActorIsFollower(prey) \
-			|| prey.IsPlayersLastRiddenHorse()
+		return prey.getRelationshipRank(pred) > 0 \
+		|| prey.IsPlayerTeammate() \
+		|| prey.IsPlayersLastRiddenHorse()
 	elseif prey == playerRef
-		 return pred.getRelationshipRank(prey) > 0 \
-		 	|| LibFire.ActorIsFollower(prey) \
-			|| pred.IsPlayersLastRiddenHorse()
-
+		return pred.getRelationshipRank(prey) > 0 \
+		|| prey.IsPlayerTeammate() \
+		|| pred.IsPlayersLastRiddenHorse()
 	else
 		return prey.getRelationshipRank(pred) > 0
 	endIf
@@ -5645,7 +5614,16 @@ EndFunction
 
 
 float Function GetPerkMultiplier(Actor subject, Perk[] perks, float base, float mult)
-	int perkIndex = LibFire.ActorFindAnyPerk(subject, perks)
+	;int perkIndex = LibFire.ActorFindAnyPerk(subject, perks)
+	int perkIndex = -1
+	int perksLength = perks.Length
+	int iIndex = 0
+    while iIndex < perksLength && perkIndex == -1
+		if subject.HasPerk(perks[iIndex])
+			perkIndex = iIndex
+		endIf
+		iIndex += 1
+	endWhile
 	int perkLevel = 1 + perkIndex
 	float result = base + mult * (perkLevel as float)
 
@@ -6239,7 +6217,8 @@ EndFunction
 
 
 float Function GetCapacity(Actor target)
-{ Gets the stomach capacity of the target, which is their capacity skill (in micromode) or their pred skill divided by ten. }
+{ Gets the stomach capacity of the target, which is their pred skill divided by ten. }
+;/
 	if MicroMode
 		float capacity = StorageUtil.GetFloatValue(target, "voreCapacity", -1.0)
 		if capacity > 0.0
@@ -6252,8 +6231,9 @@ float Function GetCapacity(Actor target)
 			endif
 		endIf
 	else
+		/;
 		return 1.0 + GetPredSkill(target) / 12.0
-	endIf
+	;endIf
 endFunction
 	
 	
@@ -6566,21 +6546,11 @@ float Function GetCumulativeSize(Actor subject)
 		scale = 10.0
 	endIf
 
-	float macromancy = AVProxy_Size.GetCurrentValue(subject) / 100.0
-	if macromancy < 0.01
-		macromancy = 0.01
-	elseif macromancy > 100.0
-		macromancy = 100.0
-	endIf
-
-	float x = macromancy * scale
-	float cumulative = x * x
-
 	if DEBUGGING
-		Log4(PREFIX, "GetCumulativeSize", Namer(subject), macromancy, scale, cumulative)
+		Log2(PREFIX, "GetCumulativeSize", Namer(subject), scale)
 	endIf
 	
-	return cumulative
+	return scale
 EndFunction
 
 
@@ -6783,11 +6753,9 @@ bool Function saveSettings(String settingsFileName)
 	JMap.setInt(data, "bossesSuperPrey", 	bossesSuperPrey as int)
 	JMap.setInt(data, "whoStruggles", 		whoStruggles)
 	JMap.setInt(data, "multiPrey", 			multiPrey)
-	JMap.setInt(data, "BYK", 				BYK)
 	JMap.setInt(data, "EndoStruggling", 	EndoStruggling as int)
 	JMap.setInt(data, "VisualStruggles", 	VisualStruggles as int)
 	JMap.setInt(data, "ComplexStruggles", 	ComplexStruggles as int)
-	JMap.setInt(data, "MacromancyMode", 	MacromancyMode)
 	
 	JMap.setFlt(data, "StruggleDifficulty", 	StruggleDifficulty)
 	JMap.setFlt(data, "StruggleDamage", 		StruggleDamage)
@@ -6796,12 +6764,10 @@ bool Function saveSettings(String settingsFileName)
 	JMap.setFlt(data, "MinimumSwallowChance", 	MinimumSwallowChance)
 	JMap.setFlt(data, "NPCBonus", 				NPCBonus)
 	JMap.setFlt(data, "CombatChanceScale", 		CombatChanceScale)
-	JMap.setFlt(data, "MacromancyScaling", 		MacromancyScaling)
 	JMap.setFlt(data, "AcidDamageModifier", 	AcidDamageModifier)
 	JMap.setFlt(data, "BurpsRate", 				BurpsRate)
 	JMap.setFlt(data, "GurglesRate", 			GurglesRate)
 	JMap.setFlt(data, "CameraShake", 			CameraShake)
-	JMap.setFlt(data, "Cooldown_Follower", 		Cooldown_Follower)
 	JMap.setFlt(data, "Cooldown_Creature", 		Cooldown_Creature)
 	JMap.setFlt(data, "Cooldown_NPC", 			Cooldown_NPC)
 
@@ -6809,13 +6775,13 @@ bool Function saveSettings(String settingsFileName)
 	JMap.setInt(data, "ShitItems", 				ShitItems as int)
 	JMap.setInt(data, "VoreTimeout", 			VoreTimeout as int)
 	JMap.setInt(data, "EndoTimeout", 			EndoTimeout as int)
-	JMap.setInt(data, "MicroMode", 				MicroMode as int)
 	JMap.setInt(data, "StomachStrip", 			StomachStrip as int)
 	JMap.setInt(data, "DrawnAnimations", 		DrawnAnimations as int)
 	JMap.setInt(data, "CrouchScat", 			CrouchScat as int)
 	JMap.setFlt(data, "WeightGain",				WeightGain)
 	JMap.setFlt(data, "ItemBurping",			ItemBurping)
-
+	
+	JMap.setInt(data, "endoAnyone", 			endoAnyone as int)
 	JMap.setInt(data, "VomitStyle", 			VomitStyle)
 	JMap.setInt(data, "UseHelpMessages", 		UseHelpMessages as int)
 	JMap.setInt(data, "Notifications", 			Notifications as int)
@@ -6826,10 +6792,11 @@ bool Function saveSettings(String settingsFileName)
 	JMap.setInt(data, "MalePreds", 			MalePreds as int)
 
 	JMap.SetObj(data, "CreaturePredatorToggles",	JArray.objectWithInts(CreaturePredatorToggles))
+	JMap.SetObj(data, "HumanoidMalePredatorToggles",	JArray.objectWithInts(HumanoidMalePredatorToggles))
+	JMap.SetObj(data, "HumanoidFemalePredatorToggles",	JArray.objectWithInts(HumanoidFemalePredatorToggles))
 	JMap.setInt(data, "PlayerAlias.DefaultLocus", PlayerAlias.DefaultLocus)
 	
 	SkullHandler.SaveSettings(data)
-	WeightManager.SaveSettings(data)
 	Menu.Morphs.SaveSettings(data)
 
 	JValue.writeToFile(data, SettingsFileName)
@@ -6858,11 +6825,9 @@ bool Function loadSettings(String settingsFileName)
 	entitlement = 			JMap.getInt(data, "entitlement", 			entitlement as int) as bool
 	whoStruggles =			JMap.getInt(data, "whoStruggles", 			whoStruggles)
 	multiPrey = 			JMap.getInt(data, "multiPrey", 				multiPrey)
-	BYK = 					JMap.getInt(data, "BYK", 					BYK)
 	EndoStruggling = 		JMap.getInt(data, "EndoStruggling", 		EndoStruggling as int) as bool
 	VisualStruggles = 		JMap.getInt(data, "VisualStruggles", 		VisualStruggles as int) as bool
 	ComplexStruggles = 		JMap.getInt(data, "ComplexStruggles", 		ComplexStruggles as int) as bool
-	MacromancyMode = 		JMap.getInt(data, "MacromancyMode", 		MacromancyMode)
 	
 	PredExperienceRate = 	JMap.getFlt(data, "PredExperienceRate", 	PredExperienceRate)
 	PreyExperienceRate = 	JMap.getFlt(data, "PreyExperienceRate", 	PreyExperienceRate)
@@ -6873,12 +6838,10 @@ bool Function loadSettings(String settingsFileName)
 	MinimumSwallowChance = 	JMap.getFlt(data, "MinimumSwallowChance", 	MinimumSwallowChance)
 	NPCBonus = 				JMap.getFlt(data, "NPCBonus", 				NPCBonus)
 	CombatChanceScale = 	JMap.getFlt(data, "CombatChanceScale", 		CombatChanceScale)
-	MacromancyScaling = 	JMap.getFlt(data, "MacromancyScaling", 		MacromancyScaling)
 	AcidDamageModifier = 	JMap.getFlt(data, "AcidDamageModifier", 	AcidDamageModifier)
 	BurpsRate = 			JMap.getFlt(data, "BurpsRate", 				BurpsRate)
 	GurglesRate = 			JMap.getFlt(data, "GurglesRate", 			GurglesRate)
 	cameraShake = 			JMap.getFlt(data, "cameraShake", 			cameraShake)
-	Cooldown_Follower = 	JMap.getFlt(data, "Cooldown_Follower", 		Cooldown_Follower)
 	Cooldown_Creature = 	JMap.getFlt(data, "Cooldown_Creature", 		Cooldown_Creature)
 	Cooldown_NPC = 			JMap.getFlt(data, "Cooldown_NPC", 			Cooldown_NPC)
 
@@ -6886,12 +6849,13 @@ bool Function loadSettings(String settingsFileName)
 	ShitItems = 			JMap.getInt(data, "ShitItems", 				ShitItems as int) as bool
 	VoreTimeout = 			JMap.getInt(data, "VoreTimeout", 			VoreTimeout as int) as bool
 	EndoTimeout = 			JMap.getInt(data, "EndoTimeout", 			EndoTimeout as int) as bool
-	MicroMode = 			JMap.getInt(data, "MicroMode", 				MicroMode as int) as bool
 	StomachStrip = 			JMap.getInt(data, "StomachStrip", 			StomachStrip as int) as bool
 	drawnAnimations = 		JMap.getInt(data, "drawnAnimations", 		drawnAnimations as int) as bool
 	crouchScat = 			JMap.getInt(data, "crouchScat", 			crouchScat as int) as bool
 	WeightGain = 			JMap.getFlt(data, "WeightGain", 			WeightGain)
 	ItemBurping = 			JMap.getFlt(data, "ItemBurping", 			ItemBurping)
+
+	endoAnyone = 			JMap.getInt(data, "endoAnyone", 			endoAnyone as int) as bool
 	VomitStyle = 			JMap.getInt(data, "VomitStyle", 			VomitStyle)
 	useHelpMessages = 		JMap.getInt(data, "useHelpMessages", 		useHelpMessages as int) as bool
 	notifications = 		JMap.getInt(data, "notifications", 			notifications as int) as bool
@@ -6901,12 +6865,13 @@ bool Function loadSettings(String settingsFileName)
 	malePreds = 			JMap.getInt(data, "malePreds", 				malePreds as int) as bool
 	
 	CreaturePredatorToggles =	JArray.asIntArray(JMap.getObj(data, "CreaturePredatorToggles", JArray.ObjectWithInts(CreaturePredatorToggles)))
+	HumanoidMalePredatorToggles =	JArray.asIntArray(JMap.getObj(data, "HumanoidMalePredatorToggles", JArray.ObjectWithInts(HumanoidMalePredatorToggles)))
+	HumanoidFemalePredatorToggles =	JArray.asIntArray(JMap.getObj(data, "HumanoidFemalePredatorToggles", JArray.ObjectWithInts(HumanoidFemalePredatorToggles)))
 	PlayerAlias.DefaultLocus = JMap.getInt(data, "DefaultLocus", PlayerAlias.DefaultLocus)
 	Menu.AltPerkMenus = 	JMap.getInt(data, "AltPerkMenus",			Menu.AltPerkMenus as int) as bool
 	Menu.RecalculateLocusCumulative()
 	
 	SkullHandler.LoadSettings(data)
-	WeightManager.LoadSettings(data)
 	Menu.Morphs.LoadSettings(data)
 
 	return true
