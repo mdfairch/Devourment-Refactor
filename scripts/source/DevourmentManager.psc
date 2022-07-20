@@ -1324,6 +1324,9 @@ function FinishLiveDigestion(Actor pred, Actor prey, int preyData)
 	playBurp_async(pred)
 	UpdateSounds_async(pred)
 
+	; Do the skull stuff!
+	AddSkull_Async(pred, prey)
+
 	; Equipment stripping.
 	bool isNPC = prey.HasKeyword(ActorTypeNPC)
 	if (isNPC && ScatTypeNPC == 0 && ScatTypeBolus > 0) || (!isNPC && ScatTypeCreature == 0 && ScatTypeBolus > 0)
