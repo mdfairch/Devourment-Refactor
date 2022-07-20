@@ -1386,6 +1386,8 @@ function FinishLiveDigestion(Actor pred, Actor prey, int preyData)
 		Entitlement_async(pred, prey)
 	endif
 
+	AddSkull_Async(pred, prey)
+
 	if pred == playerRef && pred.hasKeyword(Vampire) && prey.hasKeyword(ActorTypeNPC)
 		PlayerVampireQuest.VampireFeed()
 		Log2(PREFIX, "FinishLiveDigestion", Namer(pred), "Vampire drank blood by voring.")
@@ -1611,18 +1613,15 @@ Event DeadDigested(Form f1, Form f2, int preyData)
 
 		if (isNPC && scatTypeNPC == 0) || (!isNPC && scatTypeCreature == 0)
 			AbsorbRemains(pred, prey, preyData)
-			AddSkull_Async(pred, prey)
 			SendDeadDigestionEvent(pred, prey, 0.0)
 		elseif (isNPC && (scatTypeNPC == 1 || scatTypeNPC == 2)) || (!isNPC && scatTypeCreature == 1) 
 			if !pred.IsInCombat() && (notInPlayerHome(pred) || pred.isDead())
 				ExpelRemains(pred, prey, preyData)
-				AddSkull_Async(pred, prey)
 				SendDeadDigestionEvent(pred, prey, 0.0)
 			endIf
 		elseif (isNPC && scatTypeNPC == 3) || (!isNPC && scatTypeNPC == 2)
 			if pred != PlayerRef && (notInPlayerHome(pred) || pred.isDead())
 				RegisterVomit(prey)
-				AddSkull_Async(pred, prey)
 				SendDeadDigestionEvent(pred, prey, 0.0)
 			endIf
 		endIf
@@ -1870,7 +1869,7 @@ function AbsorbRemains(Actor pred, ObjectReference content, int preyData)
 	elseif !RegisterBlock("AbsorbRemains", pred)
 		return
 	endIf
-
+	
 	Actor apex = FindApex(content)
 	bool local = apex == playerRef || content == playerRef || apex.is3DLoaded()
 	bool apexIsDead = apex.isDead()
@@ -2658,7 +2657,6 @@ int Function TransferWornForm(Actor owner, ObjectReference bolus, int slot)
 	endIf
 EndFunction
 
-
 bool Function DigestItem(Actor pred, Form item, int count, Actor owner, bool unrestricted = true, int locus = -1)
 { 
 Creates a bolus for the specified item, with an optional owner, and registers it as swallowed. 
@@ -2688,7 +2686,7 @@ The unrestricted skips the "IsStrippable" check.
 	; If the item is a DevourmentSkull, try to revive it.
 	if item as DevourmentSkullObject
 		DevourmentSkullObject skull = item as DevourmentSkullObject
-
+		
 		if !skull.IsInitialized() || !skull.IsEnabled()
 			Log1(PREFIX, "DigestItem", "Uninitialized DevourmentSkull; skipping reformation.")
 
@@ -4045,8 +4043,9 @@ bool Function BurpItem(Actor pred)
 	
 	int stomachIndex = Utility.RandomInt(0, stomach.length - 1)
 	ObjectReference content = stomach[stomachIndex] as ObjectReference
-	
-	if content == none
+	int preydata = GetPreyData(content)
+
+	if content == none || IsEndo(preydata)
 		return false
 	endIf
 	
