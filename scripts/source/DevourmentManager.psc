@@ -1389,8 +1389,6 @@ function FinishLiveDigestion(Actor pred, Actor prey, int preyData)
 		Entitlement_async(pred, prey)
 	endif
 
-	AddSkull_Async(pred, prey)
-
 	if pred == playerRef && pred.hasKeyword(Vampire) && prey.hasKeyword(ActorTypeNPC)
 		PlayerVampireQuest.VampireFeed()
 		Log2(PREFIX, "FinishLiveDigestion", Namer(pred), "Vampire drank blood by voring.")
