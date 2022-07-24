@@ -1324,6 +1324,9 @@ function FinishLiveDigestion(Actor pred, Actor prey, int preyData)
 	playBurp_async(pred)
 	UpdateSounds_async(pred)
 
+	; Do the skull stuff!
+	AddSkull_Async(pred, prey)
+
 	; Equipment stripping.
 	bool isNPC = prey.HasKeyword(ActorTypeNPC)
 	if (isNPC && ScatTypeNPC == 0 && ScatTypeBolus > 0) || (!isNPC && ScatTypeCreature == 0 && ScatTypeBolus > 0)
@@ -1611,18 +1614,15 @@ Event DeadDigested(Form f1, Form f2, int preyData)
 
 		if (isNPC && scatTypeNPC == 0) || (!isNPC && scatTypeCreature == 0)
 			AbsorbRemains(pred, prey, preyData)
-			AddSkull_Async(pred, prey)
 			SendDeadDigestionEvent(pred, prey, 0.0)
 		elseif (isNPC && (scatTypeNPC == 1 || scatTypeNPC == 2)) || (!isNPC && scatTypeCreature == 1) 
 			if !pred.IsInCombat() && (notInPlayerHome(pred) || pred.isDead())
 				ExpelRemains(pred, prey, preyData)
-				AddSkull_Async(pred, prey)
 				SendDeadDigestionEvent(pred, prey, 0.0)
 			endIf
 		elseif (isNPC && scatTypeNPC == 3) || (!isNPC && scatTypeNPC == 2)
 			if pred != PlayerRef && (notInPlayerHome(pred) || pred.isDead())
 				RegisterVomit(prey)
-				AddSkull_Async(pred, prey)
 				SendDeadDigestionEvent(pred, prey, 0.0)
 			endIf
 		endIf
@@ -4045,8 +4045,9 @@ bool Function BurpItem(Actor pred)
 	
 	int stomachIndex = Utility.RandomInt(0, stomach.length - 1)
 	ObjectReference content = stomach[stomachIndex] as ObjectReference
-	
-	if content == none
+	int preydata = GetPreyData(content)
+
+	if content == none || IsEndo(preydata)
 		return false
 	endIf
 	
